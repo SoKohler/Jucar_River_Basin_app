@@ -1,0 +1,2244 @@
+{UTF-8}
+DéfQecolAlar=
+	max(0 , QEcolAlar-Sal Jucar)
+	~	
+	~		|
+
+SueltasAlarcón=
+	max(QEcolAlar,"%Alarcón"*Demanda Total Tous/100)
+	~	
+	~		|
+
+SueltasTous=
+	Demanda Total Aguas Abajo Tous
+	~	
+	~	IF THEN ELSE(Time<97:AND:Time>80, 0.6, 1) 3 
+		IF THEN ELSE(Time<96:AND:Time>80, 0.5, 1) 4 
+		IF THEN ELSE(Time<96:AND:Time>72, 0.6, 1) 5
+	|
+
+Estado Alarcón=
+	(Volumen esperado Alarcón/(1112.5-30))*100
+	~	
+	~		|
+
+Estado Contreras=
+	(Volumen esperado Contreras/(464-15))*100
+	~	
+	~		|
+
+SueltasContreras=
+	"%Contreras"*Demanda Total Tous/100
+	~	
+	~		|
+
+Demanda Total Tous=
+	max(0,Demanda total Ribera + Total Demanda Urbana + Pérdidas T + MinimoTous-Inflow DS Tous\
+		-Inflow Tous)
+	~	
+	~		|
+
+Demanda otros cultivos=
+	Necesidad hídrica Otros cultivos*SupOtros cultivos RA
+	~	
+	~		|
+
+Demanda otros cultivos RB=
+	SupOtros cultivos RB*Necesidad hídrica Otros cultivos
+	~	
+	~		|
+
+Demanda Ribera alta=
+	Demanda bruta anual*Distribución mensual
+	~	
+	~		|
+
+Demanda Ribera Baja=
+	Demanda bruta anual RB*Distribución mensual RB
+	~	
+	~		|
+
+Eficiencia global RB=
+	0.254
+	~	
+	~		|
+
+Demanda caqui RB=
+	Necesidad hídrica caqui*Sup caqui RB
+	~	
+	~		|
+
+Demanda cítricos=
+	Sup Cítricos RA*Necesidad Hídrica Cítricos
+	~	
+	~		|
+
+Demanda arroz=
+	SupArroz RA*Necesidad hídrica arroz
+	~	
+	~		|
+
+Demanda arroz RB=
+	Necesidad hídrica arroz*Sup Arroz RB
+	~	
+	~		|
+
+Demanda bruta anual=
+	"Demanda total neta (anual)"/Eficiencia global RA
+	~	
+	~		|
+
+Demanda bruta anual RB=
+	"Demanda total neta RB (anual)"/Eficiencia global RB
+	~	
+	~		|
+
+Demanda Caqui=
+	Sup caqui RA*Necesidad hídrica caqui
+	~	
+	~		|
+
+Eficiencia global RA=
+	0.5227
+	~	
+	~		|
+
+Necesidad hídrica Otros cultivos=
+	0.003
+	~	
+	~		|
+
+Demanda cítricos RB=
+	Necesidad Hídrica Cítricos*Sup Cítricos RB
+	~	
+	~		|
+
+DéficitRB=
+	Demanda Ribera Baja-SuminRiberaBaja
+	~	
+	~		|
+
+Sup caqui RB=
+	0.02
+	~	
+	~		|
+
+Distribución mensual:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Distribucion Mensual Cultivos', 'a' , 'b3' )
+	~	
+	~		|
+
+Distribución mensual RB:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Distribucion Mensual Cultivos', 'a' , 'c3' )
+	~	
+	~		|
+
+Necesidad Hídrica Cítricos=
+	0.003975
+	~	
+	~		|
+
+Demanda Total Ribera original=
+	Demanda Ribera alta+Demanda Ribera Baja
+	~	
+	~		|
+
+RIBERA BAJA mod=
+	Demanda Ribera Baja*Sequía demanda agrícola
+	~	
+	~		|
+
+"Demanda total neta (anual)"=
+	Demanda arroz+Demanda Caqui+Demanda cítricos+Demanda otros cultivos
+	~	
+	~		|
+
+"Demanda total neta RB (anual)"=
+	Demanda arroz RB+Demanda caqui RB+Demanda cítricos RB+Demanda otros cultivos RB
+	~	
+	~		|
+
+Necesidad hídrica arroz=
+	0.00814
+	~	
+	~		|
+
+Necesidad hídrica caqui=
+	0.004073
+	~	
+	~		|
+
+Sup Cítricos RB=
+	3288.48
+	~	
+	~		|
+
+Sup Arroz RB=
+	8818.6
+	~	
+	~		|
+
+RIBERA ALTA mod=
+	Sequía demanda agrícola*Demanda Ribera alta
+	~	
+	~		|
+
+DéficitRA=
+	Demanda Ribera alta-SuminRiberaalta
+	~	
+	~		|
+
+SupOtros cultivos RB=
+	279.07
+	~	
+	~		|
+
+SupOtros cultivos RA=
+	1288.69
+	~	Ha
+	~		|
+
+Sup caqui RA=
+	4236.49
+	~	
+	~		|
+
+Sup Cítricos RA=
+	13032
+	~	
+	~		|
+
+SupArroz RA=
+	3992.94
+	~	
+	~		|
+
+N2=
+	Sal Contreras + 0.5*Filtraciones Contreras
+	~	 [0,?]
+	~		|
+
+Sal Tous=
+	MIN(ReservaTous, SueltasTous + Aliviadero Tous)
+	~	Hm3/Month
+	~	MIN(ReservaTous, 
+		   IF THEN ELSE( Demanda Total Aguas Abajo Tous - Inflow DS Tous - Total Demanda \
+		Urbana >0 , Demanda Total Aguas Abajo Tous - Inflow DS Tous + Aliviadero \
+		Tous
+		   , SueltasTous + Aliviadero Tous ))
+	|
+
+"Suministro por Júcar-Turia"=
+	IF THEN ELSE(Sal Tous >= Total Demanda Urbana, Total Demanda Urbana , Sal Tous )
+	~	
+	~		|
+
+Recurso AA Tous=
+	Sal Tous + Inflow DS Tous + Sequía reutilización - "Suministro por Júcar-Turia"
+	~	 [0,?]
+	~		|
+
+Sumin Sagunto=
+	IF THEN ELSE("Suministro por Júcar-Turia" >= Total Demanda Urbana
+	            , Demanda Sagunto
+	            , IF THEN ELSE("Suministro por Júcar-Turia" - SuminValencia >= Demanda Sagunto
+	                          , Demanda Sagunto
+	                          , "Suministro por Júcar-Turia" - SuminValencia))
+	~	
+	~		|
+
+SuminValencia=
+	IF THEN ELSE("Suministro por Júcar-Turia" >= Total Demanda Urbana
+	            , Demanda Valencia
+	            , "Suministro por Júcar-Turia")
+	~	
+	~		|
+
+Sumin CJT=
+	IF THEN ELSE("Suministro por Júcar-Turia" + Acuífero Auxiliar >= Total Demanda Urbana
+	            , CJTreal
+	            , IF THEN ELSE("Suministro por Júcar-Turia" - SuminValencia - Sumin Sagunto\
+		 >= CJTreal
+	                          , CJTreal
+	                          , "Suministro por Júcar-Turia" - SuminValencia - Sumin Sagunto\
+		))
+	~	
+	~		|
+
+Total Storage Historico=
+	Alarcón Histórico+Contreras Histórico+Tous Histórico
+	~	
+	~		|
+
+Supplied=
+	Sumin CJT+Sumin Sagunto+SuminRiberaalta+SuminRiberaBaja+SuminValencia
+	~	
+	~		|
+
+Total Recurso Disponible Ribera=
+	Recurso AA Tous - SuminValencia - Sumin Sagunto - Sumin CJT
+	~	
+	~		|
+
+SueltasCabeceraHistórico=
+	SueltasJúcarHistórico+SueltasContrerasHistórico
+	~	
+	~		|
+
+SumaSueltascabecera=
+	Sal Contreras+Sal Jucar
+	~	
+	~		|
+
+"%Alarcón"=
+	(Alarcón/"Alarc + Cont + Tous")*100
+	~	
+	~		|
+
+"%Contreras"=
+	(Contreras/"Alarc + Cont + Tous")*100
+	~	
+	~		|
+
+"%Tous"=
+	(Tous/"Alarc + Cont + Tous")*100
+	~	
+	~		|
+
+"Alarc + Cont + Tous"=
+	Alarcón+Contreras+Tous
+	~	
+	~		|
+
+Volumen esperado Contreras=
+	Contreras + Ent Con*TIME STEP - SueltasContreras
+	~	
+	~		|
+
+Demanda Total Aguas abajo de Tous original=
+	Total Demanda Urbana+Demanda Total Ribera original
+	~	
+	~		|
+
+Déficit=
+	max(0, Demanda Total Aguas abajo de Tous original-Recurso AA Tous)
+	~	
+	~		|
+
+Déficit histórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'AJ3' )
+	~	
+	~		|
+
+Mar histórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'AK3' )
+	~	
+	~		|
+
+Sea=
+	max(0 , Recurso AA Tous-Demanda Total Aguas Abajo Tous)
+	~	
+	~		|
+
+Demanda Total Aguas Abajo Tous=
+	Demanda total Ribera+Total Demanda Urbana
+	~	
+	~		|
+
+Total Demanda Urbana=
+	Demanda Valencia+Demanda Sagunto+CJTreal
+	~	
+	~		|
+
+CJTreal=
+	IF THEN ELSE(Alarcón>Convenio Alarcón, CJT , 0 )
+	~	
+	~		|
+
+SueltasTousHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'S3' )
+	~	
+	~		|
+
+SueltasJúcarHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'AA3' )
+	~	
+	~		|
+
+EntradasAlarcónHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'X3' )
+	~	
+	~		|
+
+SueltasContrerasHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'Y3' )
+	~	
+	~		|
+
+EntradasTousHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'W3' )
+	~	
+	~		|
+
+Tous Histórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'V3' )
+	~	
+	~		|
+
+EntradasContrerasHistórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'V3' )
+	~	
+	~		|
+
+Alarcón Histórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'T3' )
+	~	
+	~	De oct 99 a sept 09
+	|
+
+Contreras Histórico:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'U3' )
+	~	
+	~		|
+
+Demanda total Ribera=
+	"Trasvase Jucar-Vinalopó" +  RIBERA BAJA mod + RIBERA ALTA mod
+	~	Hm3/Month
+	~		|
+
+Déficit Total Ribera=
+	max(0 , DéficitJucVinal+DéficitRA+DéficitRB
+	)
+	~	
+	~		|
+
+DéficitJucVinal=
+	"Trasvase Jucar-Vinalopó"-SuminJucVinalop
+	~	
+	~		|
+
+MinimoContreras=
+	15
+	~	
+	~		|
+
+Aliviadero Contreras=
+	IF THEN ELSE(Volumen esperado Contreras > Máx Contreras, (Volumen esperado Contreras\
+		 - Máx Contreras) / TIME STEP, 0 )
+	~	Hm3/Month
+	~		|
+
+"Alarc+Contr"=
+	Alarcón+Contreras
+	~	
+	~		|
+
+Sal Contreras=
+	MIN(ReservaContreras, SueltasContreras+Aliviadero Contreras)
+	~	Hm3/Month [0,?]
+	~		|
+
+Tous= INTEG (
+	Ent Tous - (Sal Tous+Pérdidas T),
+		37.11)
+	~	Hm3 [29,379]
+	~	Para delay 1 mes : DELAY FIXED(Tous, 1, Tous)
+		44.3
+	|
+
+ReservaContreras=
+	max(0 , (Contreras/TIME STEP) + Ent Con - MinimoContreras - Pérdidas C)
+	~	
+	~		|
+
+VolEsperadoTous=
+	max(35, Tous + TIME STEP*(Ent Tous-Pérdidas T) - SueltasTous)
+	~	
+	~	max(35, Tous + TIME STEP*(Ent Tous-Pérdidas T) - MIN(SueltasTous
+		   , IF THEN ELSE( Demanda Total Aguas Abajo Tous - Inflow DS Tous >0 , Demanda \
+		Total Aguas Abajo Tous - Inflow DS Tous
+		   , 0)))
+	|
+
+Convenio Alarcón:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'M3' )
+	~	
+	~		|
+
+"Sal. ATS"=
+	MIN(IF THEN ELSE(Alarcón>Convenio Alarcón, SustituMancha+Albacete , Albacete ), (Alarcón\
+		 / TIME STEP) + Ent Alar - Pérdidas A - Mínimo Alarcón)
+	~	Hm3/Month [0,?]
+	~		|
+
+AliviaderosAlarcón=
+	IF THEN ELSE ( Volumen esperado Alarcón > Máx Alarcón
+		, ( Volumen esperado Alarcón - Máx Alarcón ) / TIME STEP
+		, 0 )
+	~	Hm3/Month
+	~		|
+
+Volumen esperado Alarcón=
+	Alarcón + (Ent Alar - "Sal. ATS" - SueltasAlarcón ) * TIME STEP
+	~	
+	~		|
+
+Sal Jucar=
+	MIN(ReservaAlarcón, SueltasAlarcón + AliviaderosAlarcón)
+	~	Hm3/Month [0,?]
+	~		|
+
+"Trasvase Jucar-Vinalopó"=
+	0
+	~	
+	~		|
+
+Inflow DS Tous:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'H3' )
+	~	
+	~	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'H3' ) 2003-2013 
+		GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'Q3' ) 1970-2008
+		GET XLS DATA('data.xlsx', 'ApoRCP4.5corto', 'b', 'H3') RCP4.5CP
+		GET XLS DATA('data.xlsx', 'ApoRCP8.5corto', 'b', 'H3')
+	|
+
+Inflow Alarcón:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'D3')
+	~	
+	~	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'D3') histórico 2003-2013  
+		GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'M3' ) histórico 1971-2008
+		GET XLS DATA('data.xls', 'ApoRCP4.5corto', 'b' , 'D3' )
+		GET XLS DATA('data.xls', 'ApoRCP8.5corto', 'b' , 'D3' )
+	|
+
+"Inflow Alarcón-Molinar":INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'D3' )
+	~	
+	~	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'D3' ) 2003-2013 
+		GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'N3' ) 1970-2008
+		GET XLS DATA('data.xlsx', 'ApoRCP4.5corto', 'b' , 'E3' )
+		GET XLS DATA('data.xlsx', 'ApoRCP8.5corto', 'b' , 'E3' )
+	|
+
+Inflow Contreras:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'F3' )
+	~	
+	~	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'F3' ) 2003-2013 
+		GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'O3' ) 1970-2008
+		GET XLS DATA('data.xlsx', 'ApoRCP4.5corto', 'b' , 'F3') 
+		GET XLS DATA('data.xlsx', 'ApoRCP8.5corto', 'b' , 'F3')
+	|
+
+Inflow Tous:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'G3' )
+	~	
+	~	GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'G3' ) 2003-2013
+		GET XLS DATA('data.xlsx', 'Aportaciones', 'b' , 'P3' ) 1970-2008
+		GET XLS DATA('data.xlsx', 'ApoRCP4.5corto', 'b' , 'G3') RCP4.5CP
+		GET XLS DATA('data.xlsx', 'ApoRCP8.5corto', 'b' , 'G3')
+	|
+
+ContrerasTEvapo:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Evapotrans', 'b' , 'D3' )
+	~	
+	~		|
+
+Máx Contreras=
+	463 + Pérdidas C
+	~	
+	~		|
+
+Pérdidas A=
+	AlarcónEvapo
+	~	 [0,?]
+	~		|
+
+Pérdidas C=
+	ContrerasEvapo+Filtraciones Contreras
+	~	 [0,?]
+	~		|
+
+TousEvapo=
+	Superficie Tous*TousTEvapo*10000
+	~	
+	~		|
+
+Embalses mes=
+	Alarcón+Contreras+Tous
+	~	
+	~		|
+
+AlarconTEvapo:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Evapotrans', 'b' , 'C3' )
+	~	
+	~		|
+
+TousTEvapo:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Evapotrans', 'b' , 'E3' )
+	~	
+	~		|
+
+AlarcónEvapo=
+	AlarconTEvapo*Superficie Alarcón*10000
+	~	
+	~		|
+
+ReservaTous=
+	max(0, (Tous/TIME STEP) + Ent Tous - Pérdidas T - MinimoTous)
+	~	
+	~		|
+
+Superficie Alarcón=
+	0 + 54.9594*Alarcón^0.680283
+	~	
+	~		|
+
+Superficie Contreras=
+	0 + 31.8494*Contreras^0.651389
+	~	
+	~		|
+
+Pérdidas Tous=
+	TousEvapo + Filtraciones Tous
+	~	
+	~		|
+
+Filtraciones Tous=
+	0 + 0.065*Tous^0.8
+	~	
+	~	a = 0 b = 0.065 c = 0.8
+	|
+
+ContrerasEvapo=
+	ContrerasTEvapo*Superficie Contreras*10000
+	~	
+	~		|
+
+Filtraciones Contreras=
+	3 + 8e-005*Contreras^1.95
+	~	
+	~	a = 3 b = 8E-5 c = 1.95
+	|
+
+Superficie Tous=
+	0 + 19.1324*Tous^0.666315
+	~	
+	~		|
+
+Demanda Sagunto=
+	Sequía demanda urbana*Sagunto*Usuarios Sagunto/UsuariosinicialesS
+	~	
+	~		|
+
+Demanda Valencia=
+	Sequía demanda urbana*Valencia*UsuariosValencia/UsuariosinicialesV
+	~	
+	~		|
+
+SuminRiberaBaja=
+	IF THEN ELSE(Total Recurso Disponible Ribera >= Demanda total Ribera
+	            , RIBERA BAJA mod+Sequía bombeos adicionales
+	            , MIN(PesoRBB*Total Recurso Disponible Ribera+Sequía bombeos adicionales\
+		,RIBERA BAJA mod+Sequía bombeos adicionales))
+	~	
+	~		|
+
+SuminRiberaalta=
+	IF THEN ELSE(Total Recurso Disponible Ribera >= Demanda total Ribera
+	            , RIBERA ALTA mod*PesoRAA+Sequía bombeos adicionales
+	            , MIN(PesoRAA*Total Recurso Disponible Ribera+Sequía bombeos adicionales\
+		, RIBERA ALTA mod+Sequía bombeos adicionales))
+	~	
+	~	Para marcar la prioridad de Valencia y Sagunto debería restar al total \
+		recurso disponible aguas abajo de Tous el agua ya suministrada a Valencia \
+		y Sagunto
+	|
+
+Sequía extrema=
+	IF THEN ELSE(Déficit urbano 1 delay > 0 :AND: Time > 1
+	            , 0
+	            , ReservaTous)
+	~	
+	~		|
+
+N1=
+	"Inflow Alarcón-Molinar" + Sal Jucar
+	~	Hm3/Month [0,?]
+	~		|
+
+Ent Con=
+	Inflow Contreras
+	~	Hm3/Month
+	~		|
+
+"Déf.Mancha"=
+	max(0, SustituMancha-("Sal. ATS"-(Albacete*IF THEN ELSE(Señal de estado=0.5, 0.7, 1\
+		) - "Déf.Albacete")))
+	~	Hm3/Month
+	~		|
+
+Ent Tous=
+	Inflow Tous + Caudal Tous + N2
+	~	Hm3/Month [0,?]
+	~		|
+
+Déficit urbano=
+	Déficit Sagunto + Déficit Valencia
+	~	
+	~		|
+
+Ent Alar=
+	Inflow Alarcón
+	~	Hm3/Month
+	~		|
+
+Déficit urbano 1 delay=
+	DELAY FIXED(Déficit urbano, 1, 1)
+	~	
+	~		|
+
+PesoRAA=
+	RIBERA ALTA mod/Demanda total Ribera
+	~	
+	~		|
+
+PesoRBB=
+	RIBERA BAJA mod/Demanda total Ribera
+	~	
+	~		|
+
+DemandaRA=
+	RIBERA ALTA mod+RIBERA BAJA mod
+	~	
+	~		|
+
+Sequía bombeos adicionales=
+	IF THEN ELSE(Señal de estado >= 1.5
+	            , 0
+	            , IF THEN ELSE( Señal de estado>0.5
+	                          , 48/12
+	                          , 98/12))
+	~	
+	~	Son bombeos máximos mensuales, teniendo en cuenta que le máximo anual es el valore \
+		de 48 y 98 en el sistema Júcar.
+		Se colocaría como shadow variable de apoyo a las demandas urbanas de Valencia y \
+		sagunto (View 3).
+		Para desactivar cambiar 1.5 por 0
+	|
+
+Sequía demanda agrícola=
+	IF THEN ELSE(Señal de estado >= 1.5
+	            , 1
+	            , IF THEN ELSE(Señal de estado > 0.5
+	                          , 0.8
+	                          , 0.6))
+	~	
+	~	Para desactivar cambiar 1.5 por 0
+	|
+
+"Déf.Albacete"=
+	max(0, Albacete*IF THEN ELSE(Señal de estado=0.5, 0.7, 1)-"Sal. ATS")
+	~	Hm3/Month
+	~		|
+
+Sequía demanda urbana=
+	IF THEN ELSE(Señal de estado < 1.8
+	            , 0.95
+	            , 1)
+	~	
+	~	Para desactivar cambiar 1.8 por 0
+	|
+
+Sequía reutilización=
+	IF THEN ELSE(Señal de estado >= 1.5
+	            , 0
+	            , IF THEN ELSE(Señal de estado >0.5
+	                          , 1.2/12
+	                          , 13.5/12))
+	~	
+	~	Valores son Hm³/año por eso divido entre 12
+		La colocamos como shadow variable aguas abajo de Tous en la salida a la Ribera
+		Para desactivar cambiar 1.5 por 0
+	|
+
+"Total Demanda Alba-Mancha"=
+	SustituMancha + Albacete*IF THEN ELSE(Señal de estado=0.5, 0.7, 1)
+	~	
+	~		|
+
+EmbalsesMáx=
+	AlarconMax + ContrerasMax + TousMax
+	~	
+	~		|
+
+EmbalsesMed=
+	AlarconMed + ContrerasMed + TousMed
+	~	
+	~		|
+
+EmbalsesMín=
+	AlarconMin + ContrerasMin + TousMin
+	~	
+	~		|
+
+TousMax:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'J3' )
+	~	
+	~		|
+
+TousMed:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'K3' )
+	~	
+	~		|
+
+TousMin:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'L3' )
+	~	
+	~		|
+
+AlarconMax:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'D3' )
+	~	
+	~		|
+
+AlarconMed:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'E3' )
+	~	
+	~		|
+
+AlarconMin:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'F3' )
+	~	
+	~		|
+
+ContrerasMin:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'I3' )
+	~	
+	~		|
+
+ContrerasMed:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'H3' )
+	~	
+	~		|
+
+Indice de estado=
+	IF THEN ELSE(Embalses mes >= EmbalsesMed
+	            , 0.5*(1+((Embalses mes-EmbalsesMed)/(EmbalsesMáx-EmbalsesMed)))
+	            , max(0,(Embalses mes-EmbalsesMín)/(2*(EmbalsesMed-EmbalsesMín))) )
+	~	
+	~	Ie > 0.5 Normalidad       0.3 < Ie < 0.5 Prealerta
+		0.15 < Ie < 0.3 Alerta    Ie < 0.15 Emergencia
+	|
+
+Señal de estado=
+	IF THEN ELSE(Indice de estado >= 0.5
+	            , 2
+	            , IF THEN ELSE(Indice de estado >= 0.3
+	                          , 1.5
+	                          , IF THEN ELSE(Indice de estado >= 0.15
+	                                        , 1
+	                                        , 0.5)))
+	~	
+	~	2 Normalidad; 1.5 Prealerta; 1 Alerta; 0.5 Emergencia
+		Para desactivar medidas de actuación para sequía, sustituye 0.5 por -9
+	|
+
+ContrerasMax:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'G3' )
+	~	
+	~		|
+
+Descarga 2=
+	Alfa 2*Acuífero MO 2*EXP(-Alfa 2*TIME STEP) + Recarga Neta 2*(1-EXP(-Alfa 2*TIME STEP\
+		))
+	~	
+	~		|
+
+Descarga=
+	Alfa*Acuífero MO*EXP(-Alfa*TIME STEP) + Recarga Neta*(1-EXP(-Alfa*TIME STEP))
+	~	
+	~		|
+
+Caudal Tous=
+	N1 + Aquifer infiltration
+	~	Hm3/Month [0,?]
+	~		|
+
+Alfa 2=
+	0.4
+	~	
+	~		|
+
+"Activar/Desactivar"=
+	0
+	~	
+	~	Activado = 1
+		Desactivado = 0
+	|
+
+Coef de reparto 2=
+	0.2
+	~	
+	~		|
+
+Entradas 2=
+	Recarga Neta 2
+	~	
+	~		|
+
+Acuífero MO 2= INTEG (
+	Entradas 2-Salidas 2,
+		-3.5)
+	~	
+	~		|
+
+Recarga Neta=
+	-Coef de reparto*Mancha Oriental
+	~	
+	~		|
+
+Recarga Neta 2=
+	-Coef de reparto 2*Mancha Oriental
+	~	
+	~		|
+
+Descarga teórica total=
+	Descarga + Descarga 2
+	~	
+	~		|
+
+Coef de reparto=
+	0.8
+	~	
+	~		|
+
+Aquifer infiltration=
+	max(-N1 , Descarga teórica total)
+	~	
+	~	max(-N1 , Descarga teórica total)
+	|
+
+VariationS=
+	Usuarios Sagunto*Variation Rate*"Activar/Desactivar"
+	~	
+	~		|
+
+Salidas 2=
+	Descarga 2
+	~	
+	~		|
+
+Salidas=
+	Descarga
+	~	
+	~		|
+
+VariationV=
+	Variation Rate*UsuariosValencia*"Activar/Desactivar"
+	~	
+	~		|
+
+Acuífero Auxiliar=
+	IF THEN ELSE(Sal Tous >= Total Demanda Urbana - SumSubt
+	                          , SumSubt
+	                          , MIN(10, CJT - (Sal Tous-SuminValencia-Sumin Sagunto)) )
+	~	
+	~		|
+
+Déficit Sagunto=
+	Demanda Sagunto-Sumin Sagunto
+	~	
+	~		|
+
+Déficit Valencia=
+	Demanda Valencia-SuminValencia
+	~	
+	~		|
+
+UsuariosValencia= INTEG (
+	-VariationV,
+		UsuariosinicialesV)
+	~	
+	~		|
+
+Variation Rate=
+	0.00018728
+	~	
+	~		|
+
+Usuarios Sagunto= INTEG (
+	-VariationS,
+		UsuariosinicialesS)
+	~	
+	~		|
+
+SuminJucVinalop=
+	IF THEN ELSE(Total Recurso Disponible Ribera >= Demanda total Ribera
+	            , "Trasvase Jucar-Vinalopó"
+	            , MIN(PesoJVina*Total Recurso Disponible Ribera,"Trasvase Jucar-Vinalopó"\
+		))
+	~	
+	~		|
+
+UsuariosinicialesV=
+	1.27246e+006
+	~	
+	~		|
+
+PesoJVina=
+	"Trasvase Jucar-Vinalopó"/Demanda total Ribera
+	~	
+	~		|
+
+UsuariosinicialesS=
+	106204
+	~	
+	~		|
+
+ReservaAlarcón=
+	max(0, (Alarcón/TIME STEP) + Ent Alar - Pérdidas A - "Sal. ATS" - Mínimo Alarcón\
+		)
+	~	
+	~		|
+
+Máx Alarcón=
+	1112 + Pérdidas A
+	~	
+	~		|
+
+Alarcón= INTEG (
+	Ent Alar - Pérdidas A - Sal Jucar - "Sal. ATS",
+		262.21)
+	~	Hm3 [0,1112.5]
+	~		|
+
+Contreras= INTEG (
+	Ent Con - Pérdidas C - Sal Contreras,
+		119.12)
+	~	Hm3 [14.95,464]
+	~		|
+
+Pérdidas T=
+	Pérdidas Tous
+	~	
+	~		|
+
+Acuífero MO= INTEG (
+	Entradas-Salidas,
+		-3500)
+	~	
+	~		|
+
+Alfa=
+	0.0025
+	~	
+	~	0.0035 original, tomaba demasiada agua, no quedaba en el río
+	|
+
+Entradas=
+	Recarga Neta
+	~	
+	~		|
+
+Mínimo Alarcón=
+	30
+	~	
+	~		|
+
+Aliviadero Tous=
+	IF THEN ELSE(VolEsperadoTous > Máx Tous
+	            ,max(0 , (VolEsperadoTous-Máx Tous) / TIME STEP )
+	            , 0 )
+	~	Hm3/Month
+	~		|
+
+MinimoTous=
+	30 + 5
+	~	
+	~		|
+
+SumSubt:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'O3' )
+	~	
+	~		|
+
+SustituMancha:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'E3' )
+	~	Hm3/Month
+	~		|
+
+Albacete:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'D3' )
+	~	Hm3/Month
+	~	el abastecimiento a esta demanda se verá sufragado por recursos \
+		subterráneos en un 30% en situación de emergencia
+	|
+
+"Suma Déficits Alba-Mancha"=
+	"Déf.Mancha"+"Déf.Albacete"
+	~	Hm3/Month
+	~		|
+
+Máx Tous:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Embalses', 'b' , 'C3' )
+	~	
+	~	El máximo está adelantado un mes para que no se supere el Vol Máximo a \
+		inicios del mes siguiente. Si el maximo de septiembre es 195 Hm3, queremos \
+		que en agosto se produzcan las sueltas que garanticen que a inicios de \
+		septiembre no tendremos más de 195 Hm3 (ejemplo)
+	|
+
+Sagunto:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'H3' )
+	~	Hm3/Month
+	~		|
+
+CJT:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'I3' )
+	~	Hm3/Month
+	~	NOT REALLY UNA DEMANDA URBANA
+		Canal Jucar Turia
+	|
+
+Déficit CJT=
+	max(0, CJT-Sumin CJT)
+	~	
+	~		|
+
+Déficit Total Ribera Comprobación=
+	max(0 , Demanda total Ribera - Total Recurso Disponible Ribera)
+	~	
+	~		|
+
+Valencia:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'G3' )
+	~	Hm3/Month
+	~		|
+
+Mancha Oriental:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'F3' )
+	~	Hm3/Month
+	~	Zona albacete
+	|
+
+QEcolAlar:INTERPOLATE::=
+	GET XLS DATA('data.xlsx', 'Demandas', 'b' , 'C3' )
+	~	Hm3/Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 120
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,79,0
+10,1,Alarcón,312,220,54,29,3,131,0,24,0,0,0,0,-1--1--1,0-0-0,|20|B|0-0-0
+12,2,48,131,216,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(222,217)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(158,217)|
+11,5,48,181,217,6,8,34,3,0,0,1,0,0,0
+10,6,Ent Alar,181,236,27,11,40,3,0,0,-1,0,0,0
+12,7,48,608,211,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(549,213)|
+1,9,10,1,100,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(427,213)|
+11,10,48,495,213,6,8,34,3,0,0,1,0,0,0
+10,11,Sal Jucar,495,241,35,20,40,131,0,0,-1,0,0,0
+12,12,48,315,444,10,8,0,3,0,0,-1,0,0,0
+1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(318,412)|
+1,14,15,1,100,0,0,22,0,0,0,-1--1--1,,1|(318,310)|
+11,15,48,318,380,6,8,34,3,0,0,1,0,0,0
+10,16,"Sal. ATS",318,399,30,11,40,3,0,0,-1,0,0,0
+1,17,1,16,1,0,0,0,0,64,0,-1--1--1,,1|(294,306)|
+10,18,QEcolAlar,732,127,35,11,8,3,1,0,0,0,0,0
+10,19,N1,728,285,12,11,8,3,0,0,0,0,0,0
+1,20,10,19,1,0,43,16,2,64,0,-1--1--1,|12||0-0-0,1|(594,236)|
+10,21,Tous,1008,567,49,25,3,131,0,24,0,0,0,0,-1--1--1,0-0-0,|20|B|0-0-0
+12,22,48,786,558,10,8,0,3,0,0,-1,0,0,0
+1,23,25,21,4,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(915,560)|
+1,24,25,22,100,0,0,22,0,0,0,-1--1--1,,1|(828,560)|
+11,25,48,866,560,6,8,34,3,0,0,1,0,0,0
+10,26,Ent Tous,866,579,29,11,40,3,0,0,-1,0,0,0
+12,27,48,1238,559,10,8,0,3,0,0,-1,0,0,0
+1,28,30,27,4,0,0,22,0,0,0,-1--1--1,,1|(1182,560)|
+1,29,30,21,100,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(1091,560)|
+11,30,48,1131,560,6,8,34,3,0,0,1,0,0,0
+10,31,Sal Tous,1131,584,38,16,40,131,0,0,-1,0,0,0
+10,32,Caudal Tous,731,470,41,11,8,3,0,0,0,0,0,0
+1,33,32,25,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(793,511)|
+10,34,Contreras,1235,274,60,23,3,131,0,24,0,0,0,0,-1--1--1,0-0-0,|20|B|0-0-0
+12,35,48,977,265,10,8,0,3,0,0,-1,0,0,0
+1,36,38,34,4,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(1123,265)|
+1,37,38,35,100,0,0,22,0,0,0,-1--1--1,,1|(1023,265)|
+11,38,48,1065,265,6,8,34,3,0,0,1,0,0,0
+10,39,Ent Con,1065,284,27,11,40,3,0,0,-1,0,0,0
+12,40,48,1414,270,10,8,0,3,0,0,-1,0,0,0
+1,41,43,40,4,0,0,22,0,0,0,-1--1--1,,1|(1379,263)|
+1,42,43,34,100,0,0,22,3,0,0,0-0-255,|12||0-0-0,1|(1319,263)|
+11,43,48,1349,263,6,8,34,3,0,0,1,0,0,0
+10,44,Sal Contreras,1349,286,35,15,40,131,0,0,-1,0,0,0
+1,45,19,32,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(728,365)|
+10,46,AliviaderosAlarcón,494,162,49,18,8,131,0,0,0,0,0,0
+10,47,Aliviadero Contreras,1317,134,57,17,8,131,0,0,0,0,0,0
+1,48,47,43,1,0,0,0,0,64,0,-1--1--1,,1|(1364,179)|
+10,49,Aliviadero Tous,1183,526,39,17,8,131,0,0,0,0,0,0
+10,50,Máx Alarcón,494,102,42,11,8,3,0,0,0,0,0,0
+10,51,TIME STEP,604,113,50,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,52,50,46,0,0,0,0,0,64,0,-1--1--1,,1|(494,121)|
+1,53,51,46,0,1,0,0,2,64,0,-1--1--1,|12||0-0-0,1|(563,131)|
+10,54,TIME STEP,1161,127,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,55,54,47,0,0,0,0,0,64,0,-1--1--1,,1|(1228,129)|
+10,56,Máx Contreras,1315,69,48,11,8,3,0,0,0,0,0,0
+1,57,56,47,0,0,0,0,0,64,0,-1--1--1,,1|(1315,91)|
+10,58,Máx Tous,1192,476,33,11,8,131,0,0,0,0,0,0
+1,59,58,49,1,0,0,0,0,64,0,-1--1--1,,1|(1191,493)|
+10,60,TIME STEP,1270,447,38,17,8,130,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,61,60,49,1,1,0,0,0,64,0,-1--1--1,,1|(1183,488)|
+10,62,TIME STEP,129,399,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,63,62,16,0,0,0,0,0,64,0,-1--1--1,,1|(226,399)|
+1,64,6,16,0,0,0,0,0,64,0,-1--1--1,,1|(244,312)|
+10,65,Filtraciones Contreras,1155,317,37,19,8,3,1,0,0,0,0,0
+10,66,Contreras,1053,336,41,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,67,66,65,0,1,0,0,0,64,0,-1--1--1,,1|(1099,327)|
+10,68,N2,1096,408,12,11,8,3,0,0,0,0,0,0
+1,69,44,68,1,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(1261,367)|
+1,70,68,26,1,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(969,468)|
+12,71,48,1019,682,10,8,0,3,0,0,-1,0,0,0
+1,72,74,71,4,0,0,22,0,0,0,-1--1--1,,1|(1017,648)|
+1,73,74,21,100,0,0,22,0,0,0,-1--1--1,,1|(1017,599)|
+11,74,48,1017,615,6,8,34,3,0,0,1,0,0,0
+10,75,Pérdidas T,1017,634,35,11,40,131,0,0,-1,0,0,0
+10,76,VolEsperadoTous,1308,490,68,9,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,77,76,49,0,1,0,0,0,64,0,-1--1--1,,1|(1256,504)|
+10,78,ReservaAlarcón,494,320,60,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,79,78,11,0,0,0,0,0,64,0,-1--1--1,,1|(494,292)|
+12,80,0,180,602,44,14,8,135,0,24,-1,0,0,0,-1--1--1,0-0-0,|18|B|0-0-0
+View 1: 
+12,81,0,180,630,44,14,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|18|B|0-0-0
+View 2: 
+12,82,0,180,659,44,14,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|18|B|0-0-0
+View 3: 
+12,83,0,180,688,44,14,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|18|B|0-0-0
+View 4: 
+12,84,0,289,604,73,9,8,135,0,0,0,0,0,0
+SYSTEM NETWORK
+12,85,0,328,631,111,8,8,135,0,0,0,0,0,0
+MANCHA ORIENTAL AQUIFER
+12,86,0,365,662,147,9,8,135,0,0,0,0,0,0
+WATER DEMAND, SUPPLY AND DEFICIT
+12,87,0,337,689,120,9,8,135,0,0,-1,0,0,0
+RESERVOIRS OPERATING RULES
+10,88,Pérdidas Tous,920,628,55,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,89,88,75,0,1,0,0,0,64,0,-1--1--1,,1|(971,631)|
+1,90,46,10,0,0,0,0,0,64,0,-1--1--1,,1|(494,186)|
+12,91,48,1295,326,10,8,0,3,0,0,-1,0,0,0
+1,92,94,91,4,0,0,22,0,0,0,-1--1--1,,1|(1260,323)|
+1,93,94,34,100,0,0,22,0,0,0,-1--1--1,,1|(1230,306)|
+11,94,48,1230,323,6,8,34,3,0,0,1,0,0,0
+10,95,Pérdidas C,1230,342,36,11,40,3,0,0,-1,0,0,0
+1,96,65,94,0,1,0,0,0,64,0,-1--1--1,,1|(1201,319)|
+12,97,48,383,329,10,8,0,3,0,0,-1,0,0,0
+1,98,100,97,4,0,0,22,0,0,0,-1--1--1,,1|(385,298)|
+1,99,100,1,100,0,0,22,0,0,0,-1--1--1,,1|(385,220)|
+11,100,48,385,268,6,8,34,3,0,0,1,0,0,0
+10,101,Pérdidas A,385,287,36,11,40,3,0,0,-1,0,0,0
+10,102,Pérdidas A,487,80,45,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,103,102,50,0,1,0,0,2,64,0,-1--1--1,|12||0-0-0,1|(490,91)|
+1,104,101,16,0,1,0,0,2,64,0,-1--1--1,|12||0-0-0,1|(355,337)|
+10,105,Mínimo Alarcón,125,424,67,18,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,106,105,16,0,0,0,0,0,64,0,-1--1--1,,1|(233,410)|
+10,107,Aquifer infiltration,588,451,54,23,8,2,0,11,-1,0,0,0,128-128-128,0-0-0,|16||128-128-128
+1,108,107,32,0,0,0,0,0,64,0,-1--1--1,,1|(659,460)|
+12,109,0,180,717,44,14,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|18|B|0-0-0
+View 5: 
+12,110,0,268,718,52,11,8,135,0,0,-1,0,0,0
+STATE INDEX
+10,111,Inflow Alarcón,113,78,35,23,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+10,112,Inflow Contreras,1005,129,43,23,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+10,113,Inflow Tous,867,473,53,13,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+10,114,Inflow DS Tous,1410,586,77,16,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+10,115,"Inflow Alarcón-Molinar",858,249,74,23,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+1,116,111,6,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(144,151)|
+1,117,115,19,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(773,271)|
+1,118,112,39,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(1032,201)|
+1,119,113,25,0,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(866,508)|
+10,120,AlarcónEvapo,472,349,55,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,121,120,101,0,1,0,0,2,64,0,-1--1--1,|12||0-0-0,1|(434,322)|
+10,122,ContrerasEvapo,1143,359,62,9,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,123,122,95,0,1,0,0,0,64,0,-1--1--1,,1|(1184,350)|
+10,124,Pérdidas C,1167,65,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,125,124,56,0,0,0,0,0,64,0,-1--1--1,,1|(1232,67)|
+10,126,Volumen esperado Alarcón,323,160,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,127,126,46,0,0,0,0,0,128,0,-1--1--1,,1|(409,160)|
+10,128,SueltasAlarcón,565,269,59,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,129,128,11,0,0,0,0,0,128,0,-1--1--1,,1|(540,258)|
+10,130,"Total Demanda Alba-Mancha",318,429,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,131,Convenio Alarcón,121,377,57,11,8,3,0,0,0,0,0,0
+1,132,131,16,0,0,0,0,0,128,0,-1--1--1,,1|(225,388)|
+10,133,Albacete,124,356,38,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,134,SustituMancha,125,336,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,135,133,16,0,0,0,0,0,128,0,-1--1--1,,1|(218,376)|
+1,136,134,16,0,0,0,0,0,128,0,-1--1--1,,1|(216,365)|
+10,137,Total Demanda Urbana,1028,765,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,138,SumSubt,1054,843,39,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,139,Recurso AA Tous,1297,687,57,11,8,3,0,0,0,0,0,0
+1,140,31,139,1,0,0,15,2,128,0,-1--1--1,|12||0-0-0,1|(1233,585)|
+1,141,114,139,0,0,0,16,2,128,0,-1--1--1,|12||0-0-0,1|(1360,631)|
+10,142,Volumen esperado Contreras,1187,164,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,143,142,47,0,0,0,0,0,128,0,-1--1--1,,1|(1249,149)|
+10,144,SueltasContreras,1437,332,64,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,145,144,44,0,0,0,0,0,128,0,-1--1--1,,1|(1404,315)|
+10,146,DéfQecolAlar,720,176,45,11,8,3,1,0,0,0,0,0
+1,147,11,146,1,1,0,0,2,128,0,-1--1--1,|12||0-0-0,1|(580,177)|
+1,148,18,146,0,1,0,0,2,128,0,-1--1--1,|12||0-0-0,1|(727,144)|
+10,149,ReservaContreras,1440,233,67,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,150,149,44,0,0,0,0,0,128,0,-1--1--1,,1|(1405,253)|
+1,151,49,31,0,0,0,0,0,128,0,-1--1--1,,1|(1161,550)|
+10,152,MinimoTous,1042,812,49,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,153,TIME STEP,1116,667,50,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,154,SueltasTous,1119,499,48,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,155,154,31,0,0,0,0,0,128,0,-1--1--1,,1|(1123,532)|
+10,156,ReservaTous,1032,524,51,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,157,156,30,0,0,0,0,0,128,0,-1--1--1,,1|(1086,543)|
+10,158,Sea,1368,798,19,15,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|18||0-0-0
+1,159,139,158,0,0,0,16,2,128,0,-1--1--1,|12||0-0-0,1|(1324,730)|
+10,160,Déficit,1421,667,22,11,8,3,0,0,0,0,0,0
+1,161,139,160,0,0,0,0,0,128,0,-1--1--1,,1|(1369,675)|
+10,162,Demanda Total Tous,1472,805,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,163,Demanda Total Tous,1421,697,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,164,Demanda Total Aguas Abajo Tous,1524,606,60,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,165,164,158,0,1,0,0,2,128,0,-1--1--1,|12||0-0-0,1|(1448,698)|
+10,166,Déficit histórico,1475,632,49,11,8,3,0,0,0,0,0,0
+10,167,Mar histórico,1460,743,43,11,8,3,0,0,0,0,0,0
+10,168,Sequía reutilización,1168,661,42,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,169,168,139,0,0,0,0,0,128,0,-1--1--1,,1|(1219,671)|
+10,170,Demanda Total Ribera original,1421,697,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,171,Demanda Total Aguas abajo de Tous original,1474,706,76,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,172,171,160,0,0,0,0,0,128,0,-1--1--1,,1|(1447,686)|
+10,173,Tous Histórico,1499,484,56,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,174,"Suministro por Júcar-Turia",1148,718,55,20,8,131,0,0,0,0,0,0
+1,175,31,174,0,0,0,0,0,128,0,-1--1--1,,1|(1138,642)|
+1,176,137,174,0,0,0,0,0,128,0,-1--1--1,,1|(1079,744)|
+1,177,174,139,0,0,0,0,0,128,0,-1--1--1,,1|(1216,704)|
+1,178,65,68,0,0,0,0,0,128,0,-1--1--1,,1|(1126,360)|
+10,179,QEcolAlar,816,721,44,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,140,0
+10,1,Mancha Oriental,191,301,54,20,8,131,0,0,0,0,0,0
+10,2,Acuífero MO,406,173,50,23,3,131,0,0,0,0,0,0
+12,3,48,278,165,10,8,0,3,0,0,-1,0,0,0
+1,4,6,2,4,0,0,22,0,0,0,-1--1--1,,1|(342,165)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(302,165)|
+11,6,48,322,165,6,8,34,3,0,0,1,0,0,0
+10,7,Entradas,322,184,29,11,40,3,0,0,-1,0,0,0
+12,8,48,535,168,10,8,0,3,0,0,-1,0,0,0
+1,9,11,8,4,0,0,22,0,0,0,-1--1--1,,1|(505,166)|
+1,10,11,2,100,0,0,22,0,0,0,-1--1--1,,1|(465,166)|
+11,11,48,480,166,6,8,34,3,0,0,1,0,0,0
+10,12,Salidas,480,185,22,11,40,3,0,0,-1,0,0,0
+10,13,Recarga Neta,232,238,44,11,8,3,0,0,0,0,0,0
+1,14,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(165,252)|
+1,15,13,6,1,0,0,0,0,64,0,-1--1--1,,1|(231,167)|
+10,16,Alfa,301,348,15,11,8,3,0,0,0,0,0,0
+10,17,Descarga,423,343,31,11,8,3,0,0,0,0,0,0
+1,18,16,17,0,0,0,0,0,64,0,-1--1--1,,1|(347,346)|
+1,19,13,17,0,0,0,0,0,64,0,-1--1--1,,1|(320,287)|
+10,20,N1,609,562,21,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,21,0,315,100,44,13,8,7,0,8,-1,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+CELDA 1
+12,22,0,768,102,44,13,8,7,0,8,-1,0,0,0,-1--1--1,0-0-0,|16||0-0-0
+CELDA 2
+1,23,2,17,1,0,0,0,0,64,0,-1--1--1,,1|(448,249)|
+1,24,17,11,1,0,0,0,0,64,0,-1--1--1,,1|(507,275)|
+10,25,Acuífero MO 2,868,175,50,23,3,131,0,0,0,0,0,0
+12,26,48,740,167,10,8,0,3,0,0,-1,0,0,0
+1,27,29,25,4,0,0,22,0,0,0,-1--1--1,,1|(804,167)|
+1,28,29,26,100,0,0,22,0,0,0,-1--1--1,,1|(764,167)|
+11,29,48,784,167,6,8,34,3,0,0,1,0,0,0
+10,30,Entradas 2,784,186,35,11,40,3,0,0,-1,0,0,0
+12,31,48,997,170,10,8,0,3,0,0,-1,0,0,0
+1,32,34,31,4,0,0,22,0,0,0,-1--1--1,,1|(967,168)|
+1,33,34,25,100,0,0,22,0,0,0,-1--1--1,,1|(927,168)|
+11,34,48,942,168,6,8,34,3,0,0,1,0,0,0
+10,35,Salidas 2,942,187,30,11,40,3,0,0,-1,0,0,0
+10,36,Recarga Neta 2,694,240,50,11,8,3,0,0,0,0,0,0
+1,37,36,29,0,0,0,0,0,64,0,-1--1--1,,1|(737,203)|
+10,38,Alfa 2,763,350,21,11,8,3,0,0,0,0,0,0
+10,39,Descarga 2,885,345,37,11,8,3,0,0,0,0,0,0
+1,40,38,39,0,0,0,0,0,64,0,-1--1--1,,1|(809,348)|
+1,41,36,39,1,0,0,0,0,64,0,-1--1--1,,1|(761,299)|
+1,42,25,39,0,0,0,0,0,64,0,-1--1--1,,1|(875,259)|
+1,43,39,34,0,0,0,0,0,64,0,-1--1--1,,1|(911,260)|
+10,44,Mancha Oriental,647,309,63,23,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,45,44,36,0,0,0,0,0,64,0,-1--1--1,,1|(670,274)|
+10,46,Descarga teórica total,611,423,54,19,8,3,0,0,0,0,0,0
+1,47,17,46,0,0,0,0,0,64,0,-1--1--1,,1|(500,376)|
+1,48,39,46,0,0,0,0,0,64,0,-1--1--1,,1|(763,379)|
+10,49,Aquifer infiltration,604,495,48,20,8,131,0,0,0,0,0,0
+1,50,20,49,0,0,0,0,0,64,0,-1--1--1,,1|(607,539)|
+1,51,46,49,0,0,0,0,0,64,0,-1--1--1,,1|(608,451)|
+10,52,Coef de reparto,343,253,51,11,8,3,0,0,0,0,0,0
+10,53,Coef de reparto 2,812,258,57,11,8,3,0,0,0,0,0,0
+1,54,52,13,1,0,0,0,0,64,0,-1--1--1,,1|(300,229)|
+1,55,53,36,1,0,0,0,0,64,0,-1--1--1,,1|(763,222)|
+10,56,TIME STEP,1011,333,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,57,56,39,0,0,0,0,0,64,0,-1--1--1,,1|(948,338)|
+10,58,TIME STEP,399,394,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,59,58,17,0,0,0,0,0,64,0,-1--1--1,,1|(407,374)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 3
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,63,0
+10,1,Demanda total Ribera,-128,239,47,19,8,3,0,0,0,0,0,0
+10,2,PesoRAA,-287,271,45,11,8,3,0,0,0,0,0,0
+10,3,PesoRBB,8,96,51,11,8,3,0,0,0,0,0,0
+1,4,1,2,0,0,0,0,0,64,0,-1--1--1,,1|(-201,253)|
+1,5,1,3,1,0,0,0,0,64,0,-1--1--1,,1|(-48,171)|
+10,6,Total Recurso Disponible Ribera,-154,449,57,19,8,3,0,0,0,0,0,0
+10,7,SuminRiberaalta,-354,364,51,11,8,3,0,0,0,0,0,0
+1,8,6,7,1,0,0,0,0,64,0,-1--1--1,,1|(-325,445)|
+1,9,1,7,0,0,0,0,0,64,0,-1--1--1,,1|(-241,302)|
+10,10,PesoRAA,-370,272,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,11,10,7,0,0,0,0,0,64,0,-1--1--1,,1|(-363,311)|
+10,12,SuminRiberaBaja,-149,402,55,11,8,3,0,0,0,0,0,0
+1,13,1,12,0,0,0,0,0,64,0,-1--1--1,,1|(-137,317)|
+1,14,6,12,0,0,0,0,0,64,0,-1--1--1,,1|(-151,428)|
+10,15,PesoRBB,-298,391,61,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,16,15,12,0,0,0,0,0,64,0,-1--1--1,,1|(-227,395)|
+12,17,0,22,-61,74,27,8,135,0,8,-1,0,0,0,-1--1--1,0-0-0,|18||0-0-0
+SUMINISTRO AGRÍCOLA
+12,18,0,650,-59,59,29,8,135,0,8,-1,0,0,0,-1--1--1,0-0-0,|20||0-0-0
+DÉFICITS RIBERA
+10,19,DéficitRA,375,126,32,11,8,3,0,0,0,0,0,0
+10,20,DéficitRB,517,138,32,11,8,3,0,0,0,0,0,0
+10,21,SuminRiberaalta,273,96,61,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,22,SuminRiberaBaja,548,96,65,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,23,21,19,0,0,0,0,0,64,0,-1--1--1,,1|(316,108)|
+1,24,22,20,0,0,0,0,0,64,0,-1--1--1,,1|(537,110)|
+10,25,Déficit Total Ribera,418,180,40,19,8,3,0,0,0,0,0,0
+1,26,19,25,0,0,0,0,0,64,0,-1--1--1,,1|(388,143)|
+1,27,20,25,0,0,0,0,0,64,0,-1--1--1,,1|(481,153)|
+10,28,Total Recurso Disponible Ribera,833,91,60,23,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,29,Demanda total Ribera,970,88,52,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,30,Déficit Total Ribera Comprobación,898,147,62,19,8,3,0,0,0,0,0,0
+1,31,28,30,0,0,0,0,0,64,0,-1--1--1,,1|(861,116)|
+1,32,29,30,0,0,0,0,0,64,0,-1--1--1,,1|(939,113)|
+10,33,Valencia,269,385,28,11,8,3,0,0,0,0,0,0
+10,34,Sagunto,416,398,27,11,8,3,0,0,0,0,0,0
+10,35,CJT,564,453,15,11,8,3,0,0,0,0,0,0
+10,36,Total Demanda Urbana,446,573,49,19,8,3,0,0,0,0,0,0
+10,37,SuminValencia,716,452,47,11,8,3,0,0,0,0,0,0
+10,38,Sumin Sagunto,819,448,47,11,8,3,0,0,0,0,0,0
+10,39,Sumin CJT,943,445,36,11,8,3,0,0,0,0,0,0
+1,40,37,38,1,0,0,0,0,64,0,-1--1--1,,1|(772,430)|
+1,41,37,39,1,0,0,0,0,64,0,-1--1--1,,1|(904,479)|
+1,42,38,39,1,0,0,0,0,64,0,-1--1--1,,1|(917,467)|
+10,43,Sal Tous,718,625,53,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,44,0,641,313,79,29,8,135,0,8,-1,0,0,0,-1--1--1,0-0-0,|20||0-0-0
+SUMIN D. URBANA
+1,45,36,37,0,0,0,0,0,64,0,-1--1--1,,1|(583,511)|
+1,46,36,38,0,0,0,0,0,64,0,-1--1--1,,1|(633,510)|
+10,47,Déficit Valencia,1137,689,50,11,8,3,0,0,0,0,0,0
+10,48,Déficit Sagunto,1136,716,48,11,8,3,0,0,0,0,0,0
+10,49,Déficit CJT,1125,742,37,11,8,3,0,0,0,0,0,0
+10,50,CJT,963,776,24,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,51,SuminValencia,1306,703,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,52,Sumin CJT,1304,779,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,53,Sumin Sagunto,1310,739,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,54,51,47,0,0,0,0,0,64,0,-1--1--1,,1|(1225,696)|
+1,55,53,48,0,0,0,0,0,64,0,-1--1--1,,1|(1225,727)|
+1,56,50,49,0,0,0,0,0,64,0,-1--1--1,,1|(1030,761)|
+1,57,52,49,0,0,0,0,0,64,0,-1--1--1,,1|(1217,760)|
+10,58,Albacete,1256,506,29,11,8,3,0,0,0,0,0,0
+10,59,SustituMancha,1247,540,47,11,8,3,0,0,0,0,0,0
+10,60,"Déf.Albacete",1220,442,42,11,8,3,0,0,0,0,0,0
+10,61,"Déf.Mancha",1117,528,40,11,8,3,0,0,0,0,0,0
+1,62,58,60,0,0,0,0,0,64,0,-1--1--1,,1|(1241,480)|
+1,63,60,61,0,0,0,0,0,64,0,-1--1--1,,1|(1173,480)|
+1,64,58,61,0,0,0,0,0,64,0,-1--1--1,,1|(1198,514)|
+1,65,59,61,0,0,0,0,0,64,0,-1--1--1,,1|(1185,534)|
+10,66,"Suma Déficits Alba-Mancha",1188,600,45,19,8,3,0,0,0,0,0,0
+1,67,61,66,0,0,0,0,0,64,0,-1--1--1,,1|(1143,555)|
+1,68,60,66,1,0,0,0,0,64,0,-1--1--1,,1|(1043,522)|
+10,69,"Total Demanda Alba-Mancha",1335,463,49,19,8,3,0,0,0,0,0,0
+1,70,58,69,1,0,0,0,0,64,0,-1--1--1,,1|(1267,478)|
+1,71,59,69,1,0,0,0,0,64,0,-1--1--1,,1|(1309,519)|
+10,72,"Sal. ATS",1101,457,39,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,73,72,61,0,0,0,0,0,64,0,-1--1--1,,1|(1106,485)|
+1,74,72,60,0,0,0,0,0,64,0,-1--1--1,,1|(1152,451)|
+10,75,SumSubt,856,667,28,11,8,131,0,0,0,0,0,0
+10,76,Acuífero Auxiliar,989,623,48,28,8,131,0,0,0,0,0,0
+1,77,76,39,0,0,0,0,0,64,0,-1--1--1,,1|(965,532)|
+10,78,Demanda Total Tous,-79,633,49,19,8,3,0,0,0,0,0,0
+10,79,Demanda total Ribera,-76,582,52,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,80,Total Demanda Urbana,-217,676,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,81,79,78,0,0,0,0,0,64,0,-1--1--1,,1|(-77,600)|
+1,82,80,78,0,0,0,0,0,64,0,-1--1--1,,1|(-152,656)|
+10,83,DemandaRA,-329,100,42,11,8,3,0,0,0,0,0,0
+10,84,MinimoTous,49,606,49,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,85,Pérdidas T,51,649,46,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,86,85,78,0,0,0,0,0,64,0,-1--1--1,,1|(-5,642)|
+10,87,UsuariosValencia,283,683,40,20,3,3,0,0,0,0,0,0
+12,88,48,413,683,10,8,0,3,0,0,-1,0,0,0
+1,89,91,88,4,0,0,22,0,0,0,-1--1--1,,1|(386,683)|
+1,90,91,87,100,0,0,22,0,0,0,-1--1--1,,1|(340,683)|
+11,91,48,363,683,6,8,34,3,0,0,1,0,0,0
+10,92,VariationV,363,703,47,12,40,131,0,0,-1,0,0,0
+10,93,Variation Rate,415,790,46,11,8,3,0,0,0,0,0,0
+10,94,UsuariosinicialesV,246,755,59,21,8,131,0,0,0,0,0,0
+1,95,94,87,0,0,0,0,0,64,1,-1--1--1,,1|(260,724)|
+1,96,93,91,1,0,0,0,0,64,0,-1--1--1,,1|(391,754)|
+1,97,87,92,1,0,0,0,0,64,0,-1--1--1,,1|(339,652)|
+10,98,Demanda Valencia,295,471,59,11,8,3,0,0,0,0,0,0
+1,99,33,98,1,0,0,0,0,64,0,-1--1--1,,1|(267,415)|
+1,100,98,36,0,0,0,0,0,64,0,-1--1--1,,1|(358,514)|
+1,101,98,37,1,0,0,0,0,64,0,-1--1--1,,1|(619,360)|
+1,102,87,98,0,0,0,0,0,64,0,-1--1--1,,1|(288,579)|
+1,103,94,98,1,0,0,0,0,64,0,-1--1--1,,1|(233,577)|
+10,104,Usuarios Sagunto,522,683,40,20,3,3,0,0,0,0,0,0
+10,105,UsuariosinicialesS,462,732,56,11,8,3,0,0,0,0,0,0
+12,106,48,640,683,10,8,0,3,0,0,-1,0,0,0
+1,107,109,106,4,0,0,22,0,0,0,-1--1--1,,1|(618,683)|
+1,108,109,104,100,0,0,22,0,0,0,-1--1--1,,1|(578,683)|
+11,109,48,600,683,6,8,34,3,0,0,1,0,0,0
+10,110,VariationS,600,702,34,11,40,3,0,0,-1,0,0,0
+1,111,105,104,0,0,0,0,0,64,1,-1--1--1,,1|(480,716)|
+1,112,93,109,1,0,0,0,0,64,0,-1--1--1,,1|(550,749)|
+1,113,104,109,1,0,0,0,0,64,0,-1--1--1,,1|(569,649)|
+10,114,Demanda Sagunto,414,462,58,11,8,3,0,0,0,0,0,0
+1,115,34,114,0,0,0,0,0,64,0,-1--1--1,,1|(415,423)|
+1,116,114,36,0,0,0,0,0,64,0,-1--1--1,,1|(426,506)|
+1,117,114,38,1,0,0,0,0,64,0,-1--1--1,,1|(648,386)|
+1,118,104,114,1,0,0,0,0,64,0,-1--1--1,,1|(371,564)|
+1,119,105,114,1,0,0,0,0,64,0,-1--1--1,,1|(373,522)|
+10,120,PesoJVina,39,145,34,11,8,3,0,0,0,0,0,0
+10,121,"Trasvase Jucar-Vinalopó",71,211,49,19,8,3,0,0,0,0,0,0
+1,122,121,1,0,0,0,0,0,64,0,-1--1--1,,1|(-22,223)|
+1,123,1,120,1,0,0,0,0,64,0,-1--1--1,,1|(-36,202)|
+1,124,121,120,0,0,0,0,0,64,0,-1--1--1,,1|(56,180)|
+10,125,SuminJucVinalop,61,374,54,11,8,3,0,0,0,0,0,0
+10,126,"Trasvase Jucar-Vinalopó",31,282,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,127,126,125,0,0,0,0,0,64,0,-1--1--1,,1|(44,325)|
+10,128,PesoJVina,146,297,43,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,129,128,125,0,0,0,0,0,64,0,-1--1--1,,1|(108,330)|
+1,130,1,125,0,0,0,0,0,64,0,-1--1--1,,1|(-34,306)|
+1,131,6,125,1,0,0,0,0,64,0,-1--1--1,,1|(43,414)|
+10,132,DéficitJucVinal,576,192,47,11,8,3,0,0,0,0,0,0
+1,133,132,25,0,0,0,0,0,64,0,-1--1--1,,1|(500,186)|
+10,134,SuminJucVinalop,736,159,65,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,135,"Trasvase Jucar-Vinalopó",750,202,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,136,134,132,0,0,0,0,0,64,0,-1--1--1,,1|(664,173)|
+1,137,135,132,0,0,0,0,0,64,0,-1--1--1,,1|(666,196)|
+10,138,Demanda Sagunto,955,728,36,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,139,Demanda Valencia,962,690,61,21,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,140,139,47,0,0,0,0,0,64,0,-1--1--1,,1|(1048,689)|
+1,141,138,48,0,0,0,0,0,64,0,-1--1--1,,1|(1032,723)|
+1,142,37,76,0,0,0,0,0,64,0,-1--1--1,,1|(832,525)|
+1,143,38,76,0,0,0,0,0,64,0,-1--1--1,,1|(890,521)|
+1,144,43,76,1,0,0,0,0,64,0,-1--1--1,,1|(843,641)|
+1,145,35,76,0,0,0,0,0,64,0,-1--1--1,,1|(753,528)|
+1,146,36,76,0,0,0,0,0,64,0,-1--1--1,,1|(711,596)|
+1,147,75,76,1,0,0,0,0,64,0,-1--1--1,,1|(906,660)|
+10,148,"Activar/Desactivar",420,628,58,11,8,3,0,0,0,0,0,0
+1,149,148,92,0,0,0,0,0,64,0,-1--1--1,,1|(396,659)|
+1,150,148,110,1,0,0,0,0,64,0,-1--1--1,,1|(564,656)|
+10,151,Sequía demanda agrícola,-183,131,58,19,8,2,0,7,-1,0,0,0,192-192-192,192-255-255,|12||128-128-128
+10,152,RIBERA ALTA mod,-285,216,68,9,8,3,0,0,0,0,0,0
+10,153,RIBERA BAJA mod,-89,44,71,9,8,3,0,0,0,0,0,0
+1,154,152,1,0,0,0,0,0,64,0,-1--1--1,,1|(-206,227)|
+1,155,152,83,0,0,0,0,0,64,0,-1--1--1,,1|(-303,165)|
+1,156,152,2,0,0,0,0,0,64,0,-1--1--1,,1|(-285,235)|
+1,157,153,1,0,0,0,0,0,64,0,-1--1--1,,1|(-105,129)|
+1,158,153,3,1,0,0,0,0,64,0,-1--1--1,,1|(-46,59)|
+1,159,153,83,0,0,0,0,0,64,0,-1--1--1,,1|(-200,69)|
+1,160,151,153,0,0,0,0,0,64,0,-1--1--1,,1|(-135,87)|
+1,161,151,152,0,0,0,0,0,64,0,-1--1--1,,1|(-234,174)|
+10,162,RIBERA ALTA mod,-457,309,78,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,163,RIBERA BAJA mod,-64,349,81,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,164,163,12,0,0,0,0,0,64,0,-1--1--1,,1|(-98,370)|
+1,165,162,7,0,0,0,0,0,64,0,-1--1--1,,1|(-413,332)|
+10,166,Señal de estado,1280,368,59,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,167,166,69,0,0,0,0,0,64,0,-1--1--1,,1|(1301,405)|
+1,168,166,60,0,0,0,0,0,64,0,-1--1--1,,1|(1254,399)|
+10,169,Inflow DS Tous,46,557,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,170,Déficit urbano,1242,651,45,11,8,3,0,0,0,0,0,0
+1,171,47,170,0,0,0,0,0,64,0,-1--1--1,,1|(1182,672)|
+1,172,48,170,1,0,0,0,0,64,0,-1--1--1,,1|(1228,686)|
+1,173,166,61,1,0,0,0,0,64,0,-1--1--1,,1|(1159,427)|
+10,174,Sequía demanda urbana,157,520,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,175,174,98,1,0,0,0,0,64,0,-1--1--1,,1|(224,501)|
+1,176,174,114,1,0,0,0,0,64,0,-1--1--1,,1|(302,431)|
+10,177,Sequía bombeos adicionales,-206,334,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,178,177,7,0,0,0,0,0,64,0,-1--1--1,,1|(-276,347)|
+1,179,177,12,0,0,0,0,0,64,0,-1--1--1,,1|(-179,366)|
+1,180,84,78,0,0,0,0,0,128,0,-1--1--1,,1|(-8,617)|
+10,181,CJTreal,477,491,26,11,8,3,0,0,0,0,0,0
+10,182,Convenio Alarcón,502,420,36,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,183,182,181,0,0,0,0,0,128,0,-1--1--1,,1|(490,452)|
+1,184,35,181,0,0,0,0,0,128,0,-1--1--1,,1|(531,466)|
+10,185,Alarcón,526,527,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,186,185,181,1,0,0,0,0,64,0,-1--1--1,,1|(494,529)|
+1,187,181,36,0,0,0,0,0,128,0,-1--1--1,,1|(465,521)|
+10,188,Demanda Total Aguas Abajo Tous,-218,586,60,19,8,3,0,0,0,0,0,0
+1,189,79,188,0,0,0,0,0,128,0,-1--1--1,,1|(-136,583)|
+1,190,80,188,1,0,0,0,0,128,0,-1--1--1,,1|(-222,607)|
+10,191,Demanda Total Ribera original,-371,52,49,19,8,3,0,0,0,0,0,0
+10,192,Demanda Total Aguas abajo de Tous original,-376,588,71,19,8,3,0,0,0,0,0,0
+10,193,Demanda Total Ribera original,-386,659,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,194,193,192,0,0,0,0,0,128,0,-1--1--1,,1|(-382,630)|
+1,195,80,192,1,0,0,0,0,128,0,-1--1--1,,1|(-321,640)|
+10,196,Recurso AA Tous,-198,535,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,197,196,6,0,0,0,0,0,128,0,-1--1--1,,1|(-179,498)|
+10,198,Sumin CJT,-87,519,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,199,Sumin Sagunto,69,477,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,200,SuminValencia,-15,415,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,201,198,6,0,0,0,0,0,128,0,-1--1--1,,1|(-111,493)|
+1,202,199,6,0,0,0,0,0,128,0,-1--1--1,,1|(-34,463)|
+1,203,200,6,0,0,0,0,0,128,0,-1--1--1,,1|(-71,428)|
+1,204,181,39,1,0,0,0,0,128,0,-1--1--1,,1|(904,453)|
+1,205,36,39,0,0,0,0,0,64,0,-1--1--1,,1|(694,509)|
+10,206,Supplied,951,293,31,11,8,3,0,0,0,0,0,0
+10,207,Sumin CJT,879,256,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,208,Sumin Sagunto,974,247,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,209,SuminValencia,1090,253,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,210,SuminRiberaalta,1083,301,61,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,211,SuminRiberaBaja,1008,340,65,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,212,207,206,0,0,0,0,0,128,0,-1--1--1,,1|(908,271)|
+1,213,208,206,0,0,0,0,0,128,0,-1--1--1,,1|(965,263)|
+1,214,209,206,0,0,0,0,0,128,0,-1--1--1,,1|(1023,272)|
+1,215,210,206,0,0,0,0,0,128,0,-1--1--1,,1|(1008,296)|
+1,216,211,206,0,0,0,0,0,128,0,-1--1--1,,1|(986,321)|
+10,217,Recurso AA Tous,716,482,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,218,Recurso AA Tous,819,478,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,219,Recurso AA Tous,943,475,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,220,"Suministro por Júcar-Turia",795,379,42,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,221,220,37,0,0,0,0,0,128,0,-1--1--1,,1|(756,414)|
+1,222,220,38,0,0,0,0,0,128,0,-1--1--1,,1|(805,410)|
+1,223,220,39,0,0,0,0,0,128,0,-1--1--1,,1|(871,412)|
+10,224,Demanda Ribera alta,-477,183,40,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,225,224,191,0,0,0,0,0,128,0,-1--1--1,,1|(-428,122)|
+1,226,224,152,0,0,0,0,0,128,0,-1--1--1,,1|(-393,196)|
+10,227,Demanda Ribera alta,249,153,40,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,228,227,19,1,0,0,0,0,128,0,-1--1--1,,1|(335,149)|
+10,229,Demanda Ribera Baja,-243,18,64,26,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,230,229,191,1,0,0,0,0,128,0,-1--1--1,,1|(-361,9)|
+1,231,229,153,1,0,0,0,0,128,0,-1--1--1,,1|(-183,-23)|
+10,232,Demanda Ribera Baja,424,76,52,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,233,232,20,0,0,0,0,0,128,0,-1--1--1,,1|(464,103)|
+10,234,Inflow DS Tous,-69,727,59,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,235,234,78,0,0,0,0,0,128,0,-1--1--1,,1|(-72,690)|
+10,236,Inflow Tous,-79,671,47,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,237,236,78,0,0,0,0,0,64,0,-1--1--1,,1|(-79,663)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 4
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,85,0
+12,1,0,1119,-193,399,45,8,135,0,8,-1,0,0,0,-1--1--1,0-0-0,|36||0-0-0
+RESERVOIR OPERATING RULES
+10,2,ReservaAlarcón,439,331,57,11,8,3,0,0,0,0,0,0
+10,3,Alarcón,291,320,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,4,Mínimo Alarcón,298,348,57,11,8,3,0,0,0,0,0,0
+10,5,"Sal. ATS",301,375,39,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,6,TIME STEP,311,398,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,7,3,2,0,0,0,0,0,64,0,-1--1--1,,1|(347,323)|
+1,8,4,2,0,0,0,0,0,64,0,-1--1--1,,1|(361,340)|
+1,9,5,2,0,0,0,0,0,64,0,-1--1--1,,1|(362,355)|
+1,10,6,2,0,0,0,0,0,64,0,-1--1--1,,1|(368,367)|
+10,11,VolEsperadoTous,1793,467,65,9,8,3,0,0,0,0,0,0
+10,12,Tous,1808,432,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,13,Ent Tous,1650,395,38,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,14,Pérdidas T,1924,506,46,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,15,TIME STEP,1626,428,50,11,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,16,12,11,0,0,0,0,0,64,0,-1--1--1,,1|(1803,444)|
+1,17,13,11,0,0,0,0,0,64,0,-1--1--1,,1|(1716,428)|
+1,18,15,11,0,0,0,0,0,64,0,-1--1--1,,1|(1706,446)|
+1,19,14,11,0,0,0,0,0,64,0,-1--1--1,,1|(1862,487)|
+12,20,0,647,-121,53,19,8,7,0,8,-1,0,0,0,-1--1--1,0-0-0,|24||0-0-0
+Alarcón
+12,21,0,1082,-125,72,35,8,135,0,8,-1,0,0,0,-1--1--1,0-0-0,|24||0-0-0
+Contreras
+12,22,0,1613,-127,33,19,8,7,0,8,-1,0,0,0,-1--1--1,0-0-0,|24||0-0-0
+Tous
+10,23,TIME STEP,1248,326,50,11,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,24,ReservaTous,1406,350,48,11,8,3,0,0,0,0,0,0
+1,25,23,24,0,0,0,0,0,64,0,-1--1--1,,1|(1321,336)|
+10,26,Tous,1357,307,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,27,26,24,0,0,0,0,0,64,0,-1--1--1,,1|(1375,323)|
+10,28,MinimoTous,1444,313,46,11,8,3,0,0,0,0,0,0
+1,29,28,24,0,0,0,0,0,64,0,-1--1--1,,1|(1430,326)|
+10,30,Ent Tous,1246,375,38,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,31,30,24,0,0,0,0,0,64,0,-1--1--1,,1|(1314,364)|
+10,32,Pérdidas T,1246,348,46,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,33,32,24,0,0,0,0,0,64,0,-1--1--1,,1|(1318,348)|
+10,34,Filtraciones Tous,1833,369,54,11,8,3,0,0,0,0,0,0
+1,35,12,34,0,0,0,0,0,64,0,-1--1--1,,1|(1817,407)|
+10,36,Pérdidas Tous,1897,282,61,17,8,131,0,0,0,0,0,0
+1,37,34,36,0,0,0,0,0,64,0,-1--1--1,,1|(1858,334)|
+10,38,Pérdidas A,290,291,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,39,38,2,0,0,0,0,0,64,0,-1--1--1,,1|(357,309)|
+10,40,Ent Alar,315,256,36,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,41,40,2,0,0,0,0,0,64,0,-1--1--1,,1|(370,289)|
+10,42,Déficit urbano,1281,460,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,43,Sequía extrema,1405,412,49,11,8,3,0,0,0,0,0,0
+10,44,Déficit urbano 1 delay,1412,479,52,19,8,3,0,0,0,0,0,0
+1,45,42,44,1,0,0,0,0,64,0,-1--1--1,,1|(1317,454)|
+1,46,44,43,1,0,0,0,0,64,0,-1--1--1,,1|(1401,444)|
+1,47,24,43,1,0,0,0,0,64,0,-1--1--1,,1|(1420,375)|
+10,48,Time,1496,455,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,49,48,43,0,0,0,0,0,64,0,-1--1--1,,1|(1456,436)|
+10,50,Superficie Alarcón,398,495,58,11,8,3,0,0,0,0,0,0
+10,51,AlarcónEvapo,449,459,46,11,8,3,0,0,0,0,0,0
+10,52,Superficie Contreras,906,431,32,19,8,3,0,0,0,0,0,0
+10,53,ContrerasEvapo,1019,404,52,11,8,3,0,0,0,0,0,0
+10,54,Superficie Tous,2027,439,49,11,8,3,0,0,0,0,0,0
+10,55,TousEvapo,1970,342,37,11,8,3,0,0,0,0,0,0
+10,56,TousTEvapo,1915,425,41,11,8,3,0,0,0,0,0,0
+10,57,ContrerasTEvapo,894,384,56,11,8,3,0,0,0,0,0,0
+10,58,AlarconTEvapo,405,427,50,11,8,3,0,0,0,0,0,0
+10,59,Alarcón,319,447,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,60,Contreras,1010,448,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,61,Tous,1952,468,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,62,61,54,0,0,0,0,0,64,0,-1--1--1,,1|(1981,456)|
+1,63,54,55,0,0,0,0,0,64,0,-1--1--1,,1|(2002,396)|
+1,64,56,55,0,0,0,0,0,64,0,-1--1--1,,1|(1938,389)|
+1,65,60,52,0,0,0,0,0,64,0,-1--1--1,,1|(960,440)|
+1,66,57,53,0,0,0,0,0,64,0,-1--1--1,,1|(951,392)|
+1,67,52,53,0,0,0,0,0,64,0,-1--1--1,,1|(948,421)|
+1,68,59,50,0,0,0,0,0,64,0,-1--1--1,,1|(352,467)|
+1,69,50,51,0,0,0,0,0,64,0,-1--1--1,,1|(417,481)|
+1,70,58,51,0,0,0,0,0,64,0,-1--1--1,,1|(420,438)|
+1,71,55,36,1,0,0,0,0,64,0,-1--1--1,,1|(1952,322)|
+10,72,SueltasAlarcón,549,65,61,10,8,3,0,24,0,0,0,0,-1--1--1,0-0-0,|14|B|0-0-0
+10,73,Volumen esperado Alarcón,484,188,60,19,8,3,0,0,0,0,0,0
+10,74,Alarcón,662,198,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,75,74,73,0,0,0,0,0,64,0,-1--1--1,,1|(592,194)|
+10,76,Ent Alar,685,175,36,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,77,76,73,0,0,0,0,0,64,0,-1--1--1,,1|(603,180)|
+10,78,"Sal. ATS",643,230,39,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,79,78,73,0,0,0,0,0,64,0,-1--1--1,,1|(580,213)|
+10,80,TIME STEP,592,269,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,81,80,73,0,0,0,0,0,64,0,-1--1--1,,1|(549,236)|
+1,82,72,73,0,0,0,0,0,128,0,-1--1--1,,1|(522,115)|
+10,83,Contreras,200,-20,42,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,84,Tous,197,2,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,85,Demanda Total Tous,644,114,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,86,85,72,0,0,0,0,0,128,0,-1--1--1,,1|(594,88)|
+10,87,Alarcón,193,-40,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,88,Demanda Total Tous,195,144,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,89,SueltasContreras,1197,64,70,10,8,3,0,24,0,0,0,0,-1--1--1,0-0-0,|14|B|0-0-0
+10,90,Volumen esperado Contreras,1059,522,60,19,8,3,0,0,0,0,0,0
+10,91,Demanda Total Tous,1199,-11,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,92,91,89,0,0,0,0,0,128,0,-1--1--1,,1|(1198,24)|
+10,93,Contreras,967,601,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,94,TIME STEP,1063,574,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,95,Ent Con,927,526,36,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,96,95,90,0,0,0,0,0,128,0,-1--1--1,,1|(974,524)|
+1,97,93,90,0,0,0,0,0,128,0,-1--1--1,,1|(1002,570)|
+1,98,94,90,0,0,0,0,0,128,0,-1--1--1,,1|(1062,558)|
+10,99,Tous,844,41,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,100,Contreras,841,18,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,101,"Alarc + Cont + Tous",663,452,49,19,8,3,0,0,0,0,0,0
+10,102,Alarcón,569,472,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,103,Contreras,791,467,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,104,Tous,720,388,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,105,102,101,0,0,0,0,0,128,0,-1--1--1,,1|(602,465)|
+1,106,103,101,0,0,0,0,0,128,0,-1--1--1,,1|(737,461)|
+1,107,104,101,0,0,0,0,0,128,0,-1--1--1,,1|(699,410)|
+10,108,"Alarc + Cont + Tous",846,-1,88,22,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,109,ReservaContreras,955,299,57,11,8,3,0,0,0,0,0,0
+10,110,Contreras,1045,284,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,111,110,109,0,0,0,0,0,64,0,-1--1--1,,1|(1014,288)|
+10,112,Ent Con,992,258,36,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,113,112,109,0,0,0,0,0,64,0,-1--1--1,,1|(978,273)|
+10,114,MinimoContreras,873,264,55,11,8,3,0,0,-1,0,0,0
+1,115,114,109,0,0,0,0,0,64,0,-1--1--1,,1|(907,278)|
+10,116,Pérdidas C,862,342,55,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,117,116,109,0,0,0,0,0,64,0,-1--1--1,,1|(901,323)|
+10,118,TIME STEP,1044,331,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,119,118,109,0,0,0,0,0,64,0,-1--1--1,,1|(1006,317)|
+10,120,Tous,1496,110,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,121,Contreras,1455,24,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,122,Alarcón,1503,47,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,123,"Alarc+Contr",1487,83,41,11,8,3,0,0,0,0,0,0
+1,124,121,123,0,0,0,0,0,128,0,-1--1--1,,1|(1467,47)|
+1,125,122,123,0,0,0,0,0,128,0,-1--1--1,,1|(1498,58)|
+10,126,"Alarc + Cont + Tous",1488,145,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,127,SueltasTous,1794,121,49,11,8,3,0,24,0,0,0,0,-1--1--1,0-0-0,|14|B|0-0-0
+10,128,Aliviadero Tous,998,13,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,129,Aliviadero Tous,989,93,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,130,Aliviadero Tous,985,112,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,131,Aliviadero Tous,989,130,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,132,Aliviadero Tous,989,150,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,133,Aliviadero Tous,990,170,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,134,Aliviadero Tous,993,185,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,135,Aliviadero Tous,992,56,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,136,Aliviadero Tous,983,73,59,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,137,SueltasTous,839,66,48,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,138,Sal Tous,338,179,38,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,139,Sal Tous,341,202,38,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,140,SueltasTous,195,32,48,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,141,Sal Contreras,341,202,53,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,142,SueltasContreras,193,60,64,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,143,Demanda Total Tous,983,73,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,144,Alarcón Histórico,424,585,56,11,8,3,0,0,0,0,0,0
+10,145,Contreras Histórico,778,584,76,14,8,131,0,0,0,0,0,0
+10,146,Tous Histórico,1561,543,47,11,8,3,0,0,0,0,0,0
+10,147,SueltasTousHistórico,1578,571,68,9,8,3,0,0,0,0,0,0
+10,148,EntradasTousHistórico,1583,600,73,9,8,3,0,0,0,0,0,0
+10,149,EntradasContrerasHistórico,779,608,89,9,8,3,0,0,0,0,0,0
+10,150,SueltasContrerasHistórico,790,564,83,9,8,3,0,0,0,0,0,0
+10,151,EntradasAlarcónHistórico,409,602,82,9,8,3,0,0,0,0,0,0
+10,152,SueltasJúcarHistórico,429,560,69,9,8,3,0,0,0,0,0,0
+10,153,Inflow DS Tous,194,98,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,154,Alarcón,602,-83,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,155,Inflow DS Tous,1856,548,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,156,Demanda Total Aguas Abajo Tous,1722,527,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,157,127,11,0,0,0,0,0,64,0,-1--1--1,,1|(1793,288)|
+10,158,SueltasContreras,1054,481,64,9,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,159,158,90,0,0,0,0,0,128,0,-1--1--1,,1|(1054,489)|
+10,160,"%Contreras",724,519,39,11,8,3,0,0,0,0,0,0
+1,161,103,160,0,0,0,0,0,128,0,-1--1--1,,1|(763,488)|
+1,162,101,160,0,0,0,0,0,128,0,-1--1--1,,1|(691,484)|
+10,163,"%Alarcón",622,519,33,11,8,3,0,0,0,0,0,0
+10,164,"%Tous",626,395,24,11,8,3,0,0,0,0,0,0
+1,165,104,164,0,0,0,0,0,128,0,-1--1--1,,1|(678,390)|
+1,166,101,164,0,0,0,0,0,128,0,-1--1--1,,1|(645,425)|
+1,167,101,163,0,0,0,0,0,128,0,-1--1--1,,1|(643,483)|
+1,168,102,163,0,0,0,0,0,128,0,-1--1--1,,1|(589,490)|
+10,169,"%Alarcón",673,46,42,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,170,"%Contreras",1272,286,48,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,171,SumaSueltascabecera,1386,590,70,9,8,3,0,0,0,0,0,0
+10,172,Sal Contreras,1282,564,53,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,173,Sal Jucar,1391,549,39,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,174,172,171,0,0,0,0,0,128,0,-1--1--1,,1|(1331,576)|
+1,175,173,171,0,0,0,0,0,128,0,-1--1--1,,1|(1389,563)|
+10,176,SueltasCabeceraHistórico,606,562,83,9,8,3,0,0,0,0,0,0
+1,177,152,176,0,0,0,0,0,128,0,-1--1--1,,1|(503,560)|
+1,178,150,176,0,0,0,0,0,128,0,-1--1--1,,1|(704,563)|
+10,179,"%Tous",1193,275,33,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,180,Tous,993,185,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,181,Contreras,847,117,41,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,182,Total Storage Historico,644,358,44,19,8,3,0,0,0,0,0,0
+10,183,Alarcón Histórico,543,309,34,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,184,Contreras Histórico,639,311,37,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,185,Tous Histórico,717,315,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,186,183,182,0,0,0,0,0,128,0,-1--1--1,,1|(584,328)|
+1,187,184,182,0,0,0,0,0,128,0,-1--1--1,,1|(641,327)|
+1,188,185,182,0,0,0,0,0,128,0,-1--1--1,,1|(693,329)|
+10,189,Indice de estado,1867,190,35,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,190,Time,1882,59,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,191,Time,1284,9,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,192,169,72,0,0,0,0,0,128,0,-1--1--1,,1|(627,52)|
+10,193,"%Tous",1683,114,33,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,194,"%Contreras",1155,139,48,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,195,194,89,0,0,0,0,0,128,0,-1--1--1,,1|(1172,107)|
+10,196,Estado Alarcón,347,97,49,11,8,3,0,0,0,0,0,0
+1,197,73,196,0,0,0,0,0,128,0,-1--1--1,,1|(415,142)|
+10,198,Estado Contreras,1202,511,55,11,8,3,0,0,0,0,0,0
+1,199,90,198,0,0,0,0,0,128,0,-1--1--1,,1|(1126,517)|
+10,200,Demanda Total Tous,1794,151,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,201,Demanda Total Aguas Abajo Tous,1776,11,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,202,201,127,0,0,0,0,0,128,0,-1--1--1,,1|(1784,63)|
+10,203,QEcolAlar,473,-8,44,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,204,203,72,0,0,0,0,0,128,0,-1--1--1,,1|(505,24)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 5
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,120,0
+10,1,AlarconMed,285,291,41,11,8,3,0,0,0,0,0,0
+10,2,AlarconMax,285,400,40,11,8,3,0,0,0,0,0,0
+10,3,AlarconMin,294,509,38,11,8,3,0,0,0,0,0,0
+10,4,ContrerasMed,289,259,47,11,8,3,0,0,0,0,0,0
+10,5,ContrerasMax,288,376,46,11,8,3,0,0,0,0,0,0
+10,6,ContrerasMin,300,481,44,11,8,3,0,0,0,0,0,0
+10,7,TousMed,289,229,32,11,8,3,0,0,0,0,0,0
+10,8,TousMax,288,352,31,11,8,3,0,0,0,0,0,0
+10,9,TousMin,301,460,29,11,8,3,0,0,0,0,0,0
+10,10,EmbalsesMín,473,486,43,11,8,3,0,0,0,0,0,0
+10,11,EmbalsesMáx,466,376,45,11,8,3,0,0,0,0,0,0
+10,12,EmbalsesMed,464,251,45,11,8,3,0,0,0,0,0,0
+1,13,7,12,0,0,0,0,0,64,0,-1--1--1,,1|(363,238)|
+1,14,4,12,0,0,0,0,0,64,0,-1--1--1,,1|(370,255)|
+1,15,1,12,0,0,0,0,0,64,0,-1--1--1,,1|(365,273)|
+1,16,8,11,0,0,0,0,0,64,0,-1--1--1,,1|(363,361)|
+1,17,5,11,0,0,0,0,0,64,0,-1--1--1,,1|(370,376)|
+1,18,2,11,0,0,0,0,0,64,0,-1--1--1,,1|(366,389)|
+1,19,9,10,0,0,0,0,0,64,0,-1--1--1,,1|(373,470)|
+1,20,6,10,0,0,0,0,0,64,0,-1--1--1,,1|(380,482)|
+1,21,3,10,0,0,0,0,0,64,0,-1--1--1,,1|(374,498)|
+12,22,0,364,143,99,33,8,7,0,8,-1,0,0,0,-1--1--1,0-0-0,|22||0-0-0
+Datos Históricos Mensuales
+10,23,Tous,603,223,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,24,Contreras,685,196,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,25,Alarcón,783,222,35,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,26,Embalses mes,688,254,45,11,8,3,0,0,0,0,0,0
+1,27,23,26,0,0,0,0,0,64,0,-1--1--1,,1|(636,234)|
+1,28,24,26,0,0,0,0,0,64,0,-1--1--1,,1|(685,218)|
+1,29,25,26,0,0,0,0,0,64,0,-1--1--1,,1|(742,235)|
+10,30,Indice de estado,689,376,52,11,8,3,0,0,0,0,0,0
+1,31,12,30,0,0,0,0,0,64,0,-1--1--1,,1|(569,310)|
+1,32,26,30,0,0,0,0,0,64,0,-1--1--1,,1|(688,308)|
+1,33,11,30,0,0,0,0,0,64,0,-1--1--1,,1|(567,376)|
+1,34,10,30,0,0,0,0,0,64,0,-1--1--1,,1|(574,434)|
+10,35,Señal de estado,851,377,50,11,8,3,0,0,0,0,0,0
+1,36,30,35,0,0,0,0,0,64,0,-1--1--1,,1|(764,376)|
+10,37,Sequía demanda urbana,852,290,53,19,8,3,0,0,0,0,0,0
+10,38,Sequía demanda agrícola,972,326,53,19,8,3,0,0,0,0,0,0
+10,39,Sequía bombeos adicionales,933,448,54,19,8,3,0,0,0,0,0,0
+10,40,Sequía reutilización,852,494,60,11,8,3,0,0,0,0,0,0
+1,41,35,37,0,0,0,0,0,64,0,-1--1--1,,1|(851,344)|
+1,42,35,38,0,0,0,0,0,64,0,-1--1--1,,1|(895,358)|
+1,43,35,39,0,0,0,0,0,64,0,-1--1--1,,1|(881,403)|
+1,44,35,40,0,0,0,0,0,64,0,-1--1--1,,1|(851,428)|
+10,45,Albacete,685,463,38,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Crops
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,140,0
+10,1,SupArroz RA,304,308,44,11,8,3,0,0,0,0,0,0
+10,2,Sup Cítricos RA,59,108,52,11,8,3,0,0,0,0,0,0
+10,3,Sup caqui RA,60,219,45,11,8,3,0,0,0,0,0,0
+10,4,SupOtros cultivos RA,65,-10,37,19,8,3,0,0,0,0,0,0
+10,5,Necesidad Hídrica Cítricos,59,146,73,25,8,131,0,0,0,0,0,0
+10,6,Necesidad hídrica Otros cultivos,63,37,58,19,8,3,0,0,0,0,0,0
+10,7,Necesidad hídrica caqui,74,264,70,18,8,131,0,0,0,0,0,0
+10,8,Necesidad hídrica arroz,443,311,58,19,8,3,0,0,0,0,0,0
+10,9,Demanda arroz,370,249,49,11,8,3,0,0,0,0,0,0
+1,10,1,9,1,0,0,0,0,128,0,-1--1--1,,1|(329,273)|
+1,11,8,9,1,0,0,0,0,128,0,-1--1--1,,1|(426,285)|
+10,12,Demanda Caqui,218,225,51,11,8,3,0,0,0,0,0,0
+1,13,3,12,1,0,0,0,0,128,0,-1--1--1,,1|(127,201)|
+1,14,7,12,1,0,0,0,0,128,0,-1--1--1,,1|(117,265)|
+10,15,Demanda cítricos,219,129,55,11,8,3,0,0,0,0,0,0
+1,16,2,15,1,0,0,0,0,128,0,-1--1--1,,1|(152,96)|
+1,17,5,15,1,0,0,0,0,128,0,-1--1--1,,1|(130,157)|
+10,18,Demanda otros cultivos,200,5,49,19,8,3,0,0,0,0,0,0
+1,19,4,18,1,0,0,0,0,128,0,-1--1--1,,1|(127,-37)|
+1,20,6,18,1,0,0,0,0,128,0,-1--1--1,,1|(148,53)|
+10,21,"Demanda total neta (anual)",356,53,62,19,8,3,0,0,0,0,0,0
+1,22,18,21,1,0,0,0,0,128,0,-1--1--1,,1|(280,4)|
+1,23,15,21,1,0,0,0,0,128,0,-1--1--1,,1|(327,121)|
+1,24,12,21,1,0,0,0,0,128,0,-1--1--1,,1|(361,166)|
+1,25,9,21,1,0,0,0,0,128,0,-1--1--1,,1|(425,146)|
+10,26,Demanda bruta anual,525,87,49,19,8,3,0,0,0,0,0,0
+1,27,21,26,1,0,0,0,0,128,0,-1--1--1,,1|(443,23)|
+10,28,Eficiencia global RA,501,168,52,19,8,3,0,0,0,0,0,0
+1,29,28,26,1,0,0,0,0,128,0,-1--1--1,,1|(543,134)|
+10,30,Distribución mensual,680,90,39,19,8,3,0,0,0,0,0,0
+10,31,Demanda Ribera alta,603,14,54,19,8,3,0,0,0,0,0,0
+1,32,26,31,1,0,0,0,0,128,0,-1--1--1,,1|(541,40)|
+1,33,30,31,1,0,0,0,0,128,0,-1--1--1,,1|(674,38)|
+10,34,SupOtros cultivos RB,794,125,37,19,8,3,0,0,0,0,0,0
+10,35,Necesidad hídrica Otros cultivos,784,176,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,36,Demanda otros cultivos RB,919,143,49,19,8,3,0,0,0,0,0,0
+1,37,34,36,1,0,0,0,0,128,0,-1--1--1,,1|(841,105)|
+1,38,35,36,1,0,0,0,0,128,0,-1--1--1,,1|(854,192)|
+10,39,Sup Cítricos RB,813,233,52,11,8,3,0,0,0,0,0,0
+10,40,Necesidad Hídrica Cítricos,806,283,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,41,Demanda cítricos RB,938,244,36,19,8,3,0,0,0,0,0,0
+1,42,39,41,1,0,0,0,0,128,0,-1--1--1,,1|(865,216)|
+1,43,40,41,1,0,0,0,0,128,0,-1--1--1,,1|(880,297)|
+10,44,Sup caqui RB,795,11,44,11,8,3,0,0,0,0,0,0
+10,45,Necesidad hídrica caqui,799,66,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,46,Demanda caqui RB,907,38,50,19,8,3,0,0,0,0,0,0
+1,47,44,46,1,0,0,0,0,128,0,-1--1--1,,1|(866,-14)|
+1,48,45,46,1,0,0,0,0,128,0,-1--1--1,,1|(858,90)|
+10,49,Sup Arroz RB,1107,237,46,11,8,3,0,0,0,0,0,0
+10,50,Necesidad hídrica arroz,1214,241,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,51,Demanda arroz RB,1149,183,49,19,8,3,0,0,0,0,0,0
+1,52,49,51,1,0,0,0,0,128,0,-1--1--1,,1|(1088,197)|
+1,53,50,51,1,0,0,0,0,128,0,-1--1--1,,1|(1213,191)|
+10,54,"Demanda total neta RB (anual)",1047,113,62,19,8,3,0,0,0,0,0,0
+1,55,46,54,1,0,0,0,0,128,0,-1--1--1,,1|(1001,55)|
+1,56,36,54,1,0,0,0,0,128,0,-1--1--1,,1|(995,147)|
+1,57,41,54,1,0,0,0,0,128,0,-1--1--1,,1|(1031,207)|
+1,58,51,54,1,0,0,0,0,128,0,-1--1--1,,1|(1121,128)|
+10,59,Demanda bruta anual RB,1129,40,49,19,8,3,0,0,0,0,0,0
+10,60,Eficiencia global RB,1229,100,52,19,8,3,0,0,0,0,0,0
+1,61,54,59,1,0,0,0,0,128,0,-1--1--1,,1|(1055,59)|
+1,62,60,59,1,0,0,0,0,128,0,-1--1--1,,1|(1212,58)|
+10,63,Distribución mensual RB,1261,34,39,19,8,3,0,0,0,0,0,0
+10,64,Demanda Ribera Baja,1190,-37,54,19,8,3,0,0,0,0,0,0
+1,65,59,64,1,0,0,0,0,128,0,-1--1--1,,1|(1125,-6)|
+1,66,63,64,1,0,0,0,0,128,0,-1--1--1,,1|(1257,-10)|
+///---\\\
+:GRAPH Alarcon
+:TITLE Alarcón hist vs sim
+:SCALE
+:VAR Alarcón|Simulado
+:Y-MIN 0
+:Y-MAX 1110
+:LINE-WIDTH 2
+:VAR Alarcón Histórico|Histórico
+:Y-MIN 0
+:Y-MAX 1100
+:LINE-WIDTH 2
+
+:GRAPH Contreras
+:TITLE Contreras hist vs sim
+:SCALE
+:VAR Contreras|Simulado
+:Y-MIN 0
+:Y-MAX 480
+:LINE-WIDTH 2
+:VAR Contreras Histórico|Histórico
+:Y-MIN 0
+:Y-MAX 480
+:LINE-WIDTH 2
+
+:GRAPH Tous
+:TITLE Tous hist vs sim
+:SCALE
+:VAR Tous|Simulado
+:Y-MIN 0
+:Y-MAX 260
+:LINE-WIDTH 2
+:VAR Tous Histórico|Histórico
+:Y-MIN 0
+:Y-MAX 260
+:LINE-WIDTH 2
+
+:GRAPH Sueltas_Tous
+:TITLE Sueltas de Tous
+:SCALE
+:VAR Sal Tous|Simulado
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+:VAR SueltasTousHistórico|Histórico
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+
+:GRAPH Sueltas_Alarcón
+:TITLE Sueltas Alarcón
+:SCALE
+:VAR Sal Jucar|Simulado
+:UNITS Hm³/mes
+:Y-MIN 0
+:Y-MAX 90
+:LINE-WIDTH 2
+:VAR SueltasJúcarHistórico|Histórico
+:Y-MIN 0
+:Y-MAX 90
+:LINE-WIDTH 2
+
+:GRAPH Sueltas_teóricas_Tous
+:TITLE Sueltas Teóricas Tous
+:SCALE
+:VAR SueltasTousHistórico|Histórica
+:UNITS Hm³/mes
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+:VAR SueltasTous|Simulado
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+
+:GRAPH Sueltas_Contreras
+:TITLE Sueltas Contreras
+:SCALE
+:VAR Sal Contreras|Simulado
+:UNITS Hm³/mes
+:Y-MIN 0
+:Y-MAX 90
+:LINE-WIDTH 2
+:VAR SueltasContrerasHistórico|Histórico
+:Y-MIN 0
+:Y-MAX 90
+:LINE-WIDTH 2
+:SCALE
+:VAR Sal Contreras
+:Y-MIN 0
+:Y-MAX 90
+:DATASET Switch_contreras_se30
+:LINE-WIDTH 2
+
+:GRAPH Entradas_Tous
+:TITLE Hist vs simulado
+:SCALE
+:VAR Ent Tous|Simulado
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+:VAR EntradasTousHistórico|Histórico
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+:SCALE
+:VAR Déficit|Def
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 1
+
+:GRAPH Entradas_Contreras
+:TITLE Hist vs sim
+:SCALE
+:VAR EntradasContrerasHistórico
+:Y-MIN 0
+:Y-MAX 90
+:VAR Ent Con
+:Y-MIN 0
+:Y-MAX 90
+
+:GRAPH Entradas_Alarcón
+:TITLE sim vs hist
+:SCALE
+:VAR Ent Alar
+:Y-MIN 0
+:Y-MAX 150
+:SCALE
+:VAR EntradasAlarcónHistórico
+:Y-MIN 0
+:Y-MAX 150
+
+:GRAPH Convenio_Alarcón
+:TITLE Convenio Alarcón
+:SCALE
+:VAR Alarcón|Alarcón
+:Y-MIN 0
+:Y-MAX 700
+:LINE-WIDTH 2
+:SCALE
+:VAR Convenio Alarcón|Convenio
+:Y-MIN 0
+:Y-MAX 700
+:LINE-WIDTH 2
+:SCALE
+:VAR "Sal. ATS"|Salida ATS
+:Y-MIN 0
+:Y-MAX 35
+:LINE-WIDTH 2
+
+:GRAPH Mar_vs_Tous_vs_Aport_AA
+:TITLE Mar vs Tous vs Aport AA
+:SCALE
+:VAR Aportación AA Tous|Aportación AAbajo
+:Y-MIN 0
+:Y-MAX 125
+:LINE-WIDTH 2
+:VAR Mar|Al mar
+:Y-MIN 0
+:Y-MAX 125
+:LINE-WIDTH 2
+:VAR Tous|Tous
+:Y-MIN 0
+:Y-MAX 125
+:LINE-WIDTH 2
+
+:GRAPH Déficit
+:TITLE Déficit
+:SCALE
+:VAR Déficit|Simulado
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+:SCALE
+:VAR Déficit histórico|Histórico
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+
+:GRAPH Mar_sim_vs_histórico
+:TITLE Mar sim vs histórico
+:SCALE
+:VAR Mar|Simulado
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+:VAR Mar histórico|Histórico
+:Y-MIN 0
+:Y-MAX 120
+:LINE-WIDTH 2
+
+:GRAPH Tous_vs_Max_tous
+:TITLE Tous vs Max Tous
+:SCALE
+:VAR Tous|Tous
+:Y-MIN 0
+:Y-MAX 260
+:LINE-WIDTH 2
+:SCALE
+:VAR MaximTous|Max Tous
+:Y-MIN 0
+:Y-MAX 260
+:LINE-WIDTH 2
+:SCALE
+:VAR Tous Histórico|Histoir
+:Y-MIN 0
+:Y-MAX 260
+:LINE-WIDTH 2
+
+:GRAPH Sueltas_alarcon+Contreras
+:TITLE SueltasCabecera
+:SCALE
+:VAR SumaSueltascabecera|Simulado
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+:VAR SueltasCabeceraHistórico|Histórico
+:Y-MIN 0
+:Y-MAX 200
+:LINE-WIDTH 2
+
+:GRAPH Total_Storage
+:TITLE Total Storage
+:SCALE
+:VAR "Alarc + Cont + Tous"|Simulado
+:Y-MIN 0
+:Y-MAX 1500
+:LINE-WIDTH 2
+:VAR Total Storage Historico|Histórico
+:Y-MIN 0
+:Y-MAX 1500
+:LINE-WIDTH 2
+:L<%^E!@
+1:4-2003-2013_simple9.vdf
+9:4-2003-2013_simple9
+11:ReglasOP_full.voc
+12:calibracion1.VPD
+23:0
+15:1,0,0,0,0,0
+19:79,0
+27:0,
+34:0,
+4:Time
+5:DéfQecolAlar
+35:Date
+36:YYYY-MM-DD
+37:2003
+38:10
+39:1
+40:2
+41:1
+42:1
+24:1
+25:120
+26:120

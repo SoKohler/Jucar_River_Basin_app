@@ -1,0 +1,52 @@
+/* General Menu Styles */
+.navbar, .dropdown-menu {
+    background-color: #0f375e; /* Menu background color */
+    color: #f8f9fa; /* Menu text color */
+}
+
+/* Menu Item Styling */
+.nav-link {
+    color: #f8f9fa; /* Menu item text color */
+    background-color: #0f375e; 
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 5px 0;
+    text-align: left;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Active/Selected Menu Item */
+.nav-link.active {
+    background-color:  #006b9e; /* Highlight color for selected menu item */
+    color: #f8f9fa; /* Keep text white for contrast */
+    font-weight: bold; /* Emphasize the selected state */
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow effect */
+}
+
+/* Hover Effect for Menu Items */
+.nav-link:hover {
+    color: #f8f9fa; /* Keep text white on hover */
+    background-color: #0f375e; /* Matches active state color */
+    transition: all 0.3s ease-in-out;
+}
+
+
+/* For Nav Tabs */
+.nav-tabs .nav-link {
+    color: #f8f9fa; /* Inactive text color */
+    background-color: #0f375e; /* Inactive background */
+}
+
+.nav-tabs .nav-link.active {
+    color: #0f375e; /* Active tab text */
+    background-color: #f8f9fa; /* Active tab background */
+}
+
+.nav-tabs .nav-link:hover {
+    color: #bdc3c7; /* Hover text color */
+    background-color: #0f375e; /* Hover background */
+}
+
+
+
+
