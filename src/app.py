@@ -30,8 +30,8 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 
 # Precompute initial graph data
-workbook = openpyxl.load_workbook("data/data_initial.xlsx")
-workbook.save("data/data.xlsx")
+workbook = openpyxl.load_workbook("data_initial.xlsx")
+workbook.save("data.xlsx")
 vensim_model = pysd.load('WEFE Jucar (Simple).py')
 years_sim = 10
 months = np.arange(1, (12*years_sim)+1)
@@ -65,7 +65,6 @@ def create_home_page():
             html.Li("2. Alarcón’s Reservoir - Environmental flow simulation"),
             html.Li("3. Population Growth Analysis"),
             html.Li("4. Diverse Graphs"),
-            html.Li("jdojgoifdjgodifjgoidfjgojfdog"),
         ]),
         html.H2("User Guide", className="mt-4"),
         html.Ol([
@@ -615,7 +614,7 @@ def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_val
     else :
         qecolAlar_values = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
 
-    workbook = openpyxl.load_workbook("data/data.xlsx")
+    workbook = openpyxl.load_workbook("data.xlsx")
     sheet = workbook["Demandas"]
     column_name = "QecolAlar"
     #change only until the max row of the column QecoAlar
@@ -632,7 +631,7 @@ def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_val
         for month_index in range(12):  # Write one year (12 months) of data
             sheet.cell(row=current_row, column=column_index).value = qecolAlar_values[month_index]
             current_row += 1  
-    workbook.save("data/data.xlsx")
+    workbook.save("data.xlsx")
     #rerun the model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
     variables_model = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
