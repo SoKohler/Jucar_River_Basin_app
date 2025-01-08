@@ -558,13 +558,13 @@ def toggle_input(input_type):
 #graphs
 @app.callback(
     [Output("outflow-graph", "figure"),
-      Output("deficit-graph", "figure")],
-    [Input("run-simulation", "n_clicks")],  # Button click to trigger
+     Output("deficit-graph", "figure")],
+    [Input("run-simulation", "n_clicks")],
     [State("start-year", "value"),
      State("end-year", "value"),
-     State("qecolAlar-selector", "value"),  # Determines input type
-     State("qecolAlar-constant-input", "value"),  # Constant value
-     State("jan-value", "value"),  # Monthly dynamic values
+     State("qecolAlar-selector", "value"),
+     State("qecolAlar-constant-input", "value"),
+     State("jan-value", "value"),
      State("feb-value", "value"),
      State("mar-value", "value"),
      State("apr-value", "value"),
@@ -580,7 +580,7 @@ def toggle_input(input_type):
 )
 
 
-def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_value,jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
+def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
     # Initial monthly vector
@@ -625,35 +625,28 @@ def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_val
         if col.value == column_name:
             column_index = col.column  
             break
-      
-    # Write the  for years_sim years (years_sim x 12 rows)
-    current_row = 3  # Start from row 3 
+    current_row = 3  # Start from row 3
     for year in range(years_sim):  # Repeat for years_sim years
         for month_index in range(12):  # Write one year (12 months) of data
             sheet.cell(row=current_row, column=column_index).value = qecolAlar_values[month_index]
-            current_row += 1  
+            current_row += 1
     workbook.save("data.xlsx")
+
     #rerun the model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
+    # Check if the model is correctly reloaded
     variables_model = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
+
     updated_outflow = variables_model['Sal Jucar']
     updated_deficit = variables_model['DéfQecolAlar']
     
-    
-    
-
-    
-    
-    # graph outlflow
     outflow_figure = go.Figure()
-    #initial
     outflow_figure.add_trace(
-        go.Scatter(x=months, y=initial_outflow, mode="lines", name=f"Initial Outflow (QecoAlar = {initial_qecolAlar_value})", line=dict(dash="dot")),
+        go.Scatter(x=months, y=initial_outflow, mode="lines", name=f"Initial Outflow (QecoAlar = {initial_qecolAlar_value})", line=dict(dash="dot"))
     )
-    #updated
     outflow_figure.add_trace(
         go.Scatter(x=months, y=updated_outflow, mode="lines", name="Updated Outflow")
-    )
+        )
     #layout
     outflow_figure.update_layout(
         title="Outflow Over Time",
