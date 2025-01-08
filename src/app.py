@@ -30,9 +30,9 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 
 # Precompute initial graph data
-workbook = openpyxl.load_workbook("data_initial.xlsx")
-workbook.save("data.xlsx")
-vensim_model = pysd.load('WEFE Jucar (Simple).py')
+workbook = openpyxl.load_workbook("data/data_initial.xlsx")
+workbook.save("data/data.xlsx")
+vensim_model = pysd.load('src/WEFE Jucar (Simple).py')
 years_sim = 10
 months = np.arange(1, (12*years_sim)+1)
 variables_model_initial = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
@@ -614,7 +614,7 @@ def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_val
     else :
         qecolAlar_values = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
 
-    workbook = openpyxl.load_workbook("data.xlsx")
+    workbook = openpyxl.load_workbook("data/data.xlsx")
     sheet = workbook["Demandas"]
     column_name = "QecolAlar"
     #change only until the max row of the column QecoAlar
@@ -631,9 +631,9 @@ def update_Alarcon_graphs(n_clicks,start_year, end_year,input_type, constant_val
         for month_index in range(12):  # Write one year (12 months) of data
             sheet.cell(row=current_row, column=column_index).value = qecolAlar_values[month_index]
             current_row += 1  
-    workbook.save("data.xlsx")
+    workbook.save("data/data.xlsx")
     #rerun the model
-    vensim_model = pysd.load('WEFE Jucar (Simple).py')
+    vensim_model = pysd.load('src/WEFE Jucar (Simple).py')
     variables_model = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
     updated_outflow = variables_model['Sal Jucar']
     updated_deficit = variables_model['DéfQecolAlar']
@@ -714,7 +714,7 @@ def update_population_graph(n_clicks, start_year, end_year, variation_rate):
     months = np.arange(1, 12 * years_sim + 1)
     
     # Load and run the Vensim model
-    vensim_model = pysd.load('WEFE Jucar (Simple).py')
+    vensim_model = pysd.load('src/WEFE Jucar (Simple).py')
     #change Variation and Activate 
     variables_model = vensim_model.run(params={'INITIAL TIME': 1,'FINAL TIME': 12 * years_sim,'TIME STEP': 1,'Variation Rate': variation_rate, '"Activar/Desactivar"': 1,})
     updated_urban_demand = variables_model['Total Demanda Urbana']
