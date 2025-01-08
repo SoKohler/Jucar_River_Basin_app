@@ -556,6 +556,7 @@ def toggle_input(input_type):
     return {"display": "none"}, {"display": "none"},{"display": "none"}
 
 #graphs
+# Graph callbacks
 @app.callback(
     [Output("outflow-graph", "figure"),
      Output("deficit-graph", "figure")],
@@ -578,14 +579,14 @@ def toggle_input(input_type):
      State("dec-value", "value")],
     prevent_initial_call=True
 )
-
-
 def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
-    # Initial monthly vector
-    qecolAlar_values = []
 
+    
+    # Calculate the number of months based on the selected years
+    years_sim = end_year - start_year + 1
+    months = np.arange(1, 12 * years_sim + 1)
     
     # Calculate the number of months based on the selected years
     years_sim = end_year - start_year + 1
@@ -607,47 +608,60 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
     else:
         tickvals = list(range(1, len(all_months_labels) + 1))
         ticktext = all_months_labels
-    
-        
-    # Determine input value
-    if input_type == "option1" :
-        qecolAlar_values = [constant_value]*12
-    else :
+
+    # Determine QecoAlar values based on input type
+    if input_type == "option1":
+        qecolAlar_values = [constant_value] * 12
+    else:
         qecolAlar_values = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
 
+    # Update the Excel file
     workbook = openpyxl.load_workbook("data.xlsx")
     sheet = workbook["Demandas"]
     column_name = "QecolAlar"
-    #change only until the max row of the column QecoAlar
-    # First, find the index of column "QecolAlar
+
+    # Find the column index for QecolAlar
     column_index = None
-    for col in sheet[2]:  # Check header row 2
+    for col in sheet[2]:  # Assuming header is in row 2
         if col.value == column_name:
-            column_index = col.column  
+            column_index = col.column
             break
+
+    if column_index is None:
+        raise ValueError("Column 'QecolAlar' not found in the Excel sheet.")
+
+    # Update the column with new values
     current_row = 3  # Start from row 3
-    for year in range(years_sim):  # Repeat for years_sim years
-        for month_index in range(12):  # Write one year (12 months) of data
+    for year in range(years_sim):
+        for month_index in range(12):
             sheet.cell(row=current_row, column=column_index).value = qecolAlar_values[month_index]
             current_row += 1
+
+    # Save the workbook
     workbook.save("data.xlsx")
 
-    #rerun the model
+    # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
-    # Check if the model is correctly reloaded
-    variables_model = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
+    variables_model = vensim_model.run(params={
+        'INITIAL TIME': 1,
+        'FINAL TIME': 12 * years_sim,
+        'TIME STEP': 1
+    })
 
     updated_outflow = variables_model['Sal Jucar']
     updated_deficit = variables_model['DéfQecolAlar']
-    
+
+    # Create updated graphs
     outflow_figure = go.Figure()
-    outflow_figure.add_trace(
-        go.Scatter(x=months, y=initial_outflow, mode="lines", name=f"Initial Outflow (QecoAlar = {initial_qecolAlar_value})", line=dict(dash="dot"))
-    )
-    outflow_figure.add_trace(
-        go.Scatter(x=months, y=updated_outflow, mode="lines", name="Updated Outflow")
-        )
-    #layout
+    outflow_figure.add_trace(go.Scatter(
+        x=months, y=initial_outflow, mode="lines",
+        name=f"Initial Outflow (QecoAlar = {initial_qecolAlar_value})",
+        line=dict(dash="dot")
+    ))
+    outflow_figure.add_trace(go.Scatter(
+        x=months, y=updated_outflow, mode="lines",
+        name="Updated Outflow"
+    ))
     outflow_figure.update_layout(
         title="Outflow Over Time",
         xaxis=dict(title="Time",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
@@ -655,17 +669,17 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
         margin=dict(l=40, r=40, t=40, b=40),
         template="plotly_white",
     )
-    # graph deficit 
+
     deficit_figure = go.Figure()
-    #initial
-    deficit_figure.add_trace(
-        go.Scatter(x=months, y=initial_deficit, mode="lines", name=f"initial Deficit (QecoAlar ={initial_qecolAlar_value})",line=dict(dash="dot")),
-    )
-    #updated
-    deficit_figure.add_trace(
-        go.Scatter(x=months, y=updated_deficit, mode="lines", name="Uptated Deficit")
-    )
-    #layout
+    deficit_figure.add_trace(go.Scatter(
+        x=months, y=initial_deficit, mode="lines",
+        name=f"Initial Deficit (QecoAlar = {initial_qecolAlar_value})",
+        line=dict(dash="dot")
+    ))
+    deficit_figure.add_trace(go.Scatter(
+        x=months, y=updated_deficit, mode="lines",
+        name="Updated Deficit"
+    ))
     deficit_figure.update_layout(
         title="Deficit Over Time",
         xaxis=dict(title="Time",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
@@ -673,9 +687,8 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
         margin=dict(l=40, r=40, t=40, b=40),
         template="plotly_white",
     )
+
     return outflow_figure, deficit_figure
-
-
 
 
 #4.3 Population growth call back
