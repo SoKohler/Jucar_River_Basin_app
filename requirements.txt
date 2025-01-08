@@ -3,7 +3,6 @@ dash_bootstrap_components==1.6.0
 numpy==2.2.1
 openpyxl==3.1.5
 pysd==3.14.2
-plotly.graph_objs
 gunicorn
 pandas
 dash-tools
