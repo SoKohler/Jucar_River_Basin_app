@@ -28,10 +28,29 @@ import dash
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
+import boto3
+
+
+
+def upload_to_s3(file_name, bucket_name, object_name=None):
+    # S3 client
+    s3_client = boto3.client('s3', aws_access_key_id='YOUR_ACCESS_KEY', aws_secret_access_key='YOUR_SECRET_KEY')
+
+    if object_name is None:
+        object_name = file_name
+
+    try:
+        s3_client.upload_file(file_name, bucket_name, object_name)
+        print(f"Fichier {file_name} sauvegardé dans le bucket S3 : {bucket_name}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi à S3 : {e}")
+
+
 
 # Precompute initial graph data
 workbook = openpyxl.load_workbook("data_initial.xlsx")
 workbook.save("data.xlsx")
+upload_to_s3("data.xlsx", "mon-bucket-s3")
 vensim_model = pysd.load('WEFE Jucar (Simple).py')
 years_sim = 10
 months = np.arange(1, (12*years_sim)+1)
@@ -639,6 +658,7 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
 
     # Save the workbook
     workbook.save("data.xlsx")
+    upload_to_s3("data.xlsx", "mon-bucket-s3")
 
     # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')

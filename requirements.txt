@@ -7,6 +7,6 @@ pysd==3.14.2
 gunicorn
 pandas
 dash-tools
-
+boto3
 
 
