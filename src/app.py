@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  8 11:59:19 2025
-
-@author: sophi
-"""
 
 # -*- coding: utf-8 -*-
 """
@@ -13,18 +7,20 @@ Created on Wed Dec 18 10:49:58 2024
 
 source documentation : https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
 http://127.0.0.1:8050
-http://158.42.236.61:8050
-
 
 GET LOCAL IP 
 # Trouver l'adresse IP locale
-
+import socket
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+print(f"Adresse IP locale : {local_ip}")
 """
 #cd C:\Users\sophi\myCloud\Sophia\Thesis\Model\Jucar_model\Adrià\App_Jucar
 #streamlit run Jucar_river_basin.py
 #git save
 
 # Import libraries and modules
+import pandas as pd
 import numpy as np
 import openpyxl
 import pysd
@@ -32,7 +28,7 @@ import dash
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
-import os
+
 # Precompute initial graph data
 workbook = openpyxl.load_workbook("data_initial.xlsx")
 workbook.save("data.xlsx")
@@ -54,9 +50,8 @@ months_labels = []
 
 # Initialize the Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY, "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"], suppress_callback_exceptions=True)
-server = app.server
 app.title = "Júcar River Basin Water Management"
-
+server = app.server
 # Define reusable page components
 #### 1. Home page
 def create_home_page():
@@ -783,11 +778,7 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
     months = np.arange(1, 12 * years_sim + 1)
 
     # Simulate the Vensim model to calculate the chosen variable
-    vensim_model = pysd.load('WEFE Jucar (Simple).py')  # Load the model
-    results = vensim_model.run(
-        params={'INITIAL TIME': 1, 'FINAL TIME': 12 * years_sim, 'TIME STEP': 1}
-    )
-    updated_variable = results[chosen_variable]  
+    variable = variables_model_initial[chosen_variable]  
 
     # Generate labels for all months and October-only
     all_months_labels = []
@@ -814,7 +805,7 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
     figure.add_trace(
         go.Scatter(
             x=months,
-            y=updated_variable,
+            y=variable,
             mode="lines",
             name=f"Updated {chosen_variable}",
         )
