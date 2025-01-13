@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec 18 10:49:58 2024
@@ -8,65 +7,55 @@ Created on Wed Dec 18 10:49:58 2024
 source documentation : https://dash-bootstrap-components.opensource.faculty.ai/docs/components/accordion/
 http://127.0.0.1:8050
 
-GET LOCAL IP 
-# Trouver l'adresse IP locale
-import socket
-hostname = socket.gethostname()
-local_ip = socket.gethostbyname(hostname)
-print(f"Adresse IP locale : {local_ip}")
 """
-#cd C:\Users\sophi\myCloud\Sophia\Thesis\Model\Jucar_model\Adrià\App_Jucar
-#streamlit run Jucar_river_basin.py
-#git save
-
 # Import libraries and modules
 import pandas as pd
-import numpy as np
-import openpyxl
 import pysd
 import dash
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
+
 import plotly.graph_objs as go
-import boto3
 
-
-
-def upload_to_s3(file_name, bucket_name, object_name=None):
-    # S3 client
-    s3_client = boto3.client('s3', aws_access_key_id='YOUR_ACCESS_KEY', aws_secret_access_key='YOUR_SECRET_KEY')
-
-    if object_name is None:
-        object_name = file_name
-
-    try:
-        s3_client.upload_file(file_name, bucket_name, object_name)
-        print(f"Fichier {file_name} sauvegardé dans le bucket S3 : {bucket_name}")
-    except Exception as e:
-        print(f"Erreur lors de l'envoi à S3 : {e}")
-
-
-
-# Precompute initial graph data
-workbook = openpyxl.load_workbook("data_initial.xlsx")
-workbook.save("data.xlsx")
-upload_to_s3("data.xlsx", "mon-bucket-s3")
+"""in this version I will not modify the excel sheet but directly work with the variable saved in Vensim
+    Therefore, I will run the model (Vensim) one with the initial values and then exctract the data 
+    from it and rerun it with the modified values.
+    The inputs (from the excel "data") start with month (oct-2003)!
+    Therefore I will add two columns in the Variables_model_initial from the Excel:
+        1. Month
+        2. Years
+"""
+# Precompute initial results and data of the Vensim model (for 10 years)
 vensim_model = pysd.load('WEFE Jucar (Simple).py')
 years_sim = 10
-months = np.arange(1, (12*years_sim)+1)
 variables_model_initial = vensim_model.run(params={'INITIAL TIME': 1, 'FINAL TIME': 12*years_sim, 'TIME STEP': 1})
-#1.Alarcon initial values
-initial_qecolAlar_value = 5.18
-qecolAlar_value = initial_qecolAlar_value
-initial_outflow = variables_model_initial['Sal Jucar']
-initial_deficit = variables_model_initial['DéfQecolAlar']
-#1.Population growth initial value
-initial_variation_rate = 0.00018728
-variation_rate = initial_variation_rate
-initial_urban_demand = variables_model_initial['Total Demanda Urbana']
-# Generate labels for months and years
-months_labels = []
+variables_model_initial.index = range(0, len(variables_model_initial) ) #change the index because Vensim starts at 1 
+# add columns : year and months
+data = pd.read_excel("data.xlsx", skiprows=1)
+months_data = data["Mes"][0:years_sim*12] #extract months from the data sheet
+years_data = data["Año"][0:years_sim*12] #extract years from the data sheet
+variables_model_initial['Mes'] = months_data
+variables_model_initial['Año'] = years_data
+time = pd.Series(variables_model_initial.index)
+# # Generate labels for months and years
+# months_labels = list(months_data)
+# years_labels = list(years_data)
 
+
+## initial values
+#3.0 Alarcon initial values
+QecolAlar_initial = variables_model_initial["QEcolAlar"]
+qecolAlar_initial_cst = QecolAlar_initial[1]
+Outflow_Jucar_initial = variables_model_initial['Sal Jucar']
+DéfQecolAlar_initial = variables_model_initial['DéfQecolAlar']
+
+#4.0 Population growth initial values 
+Variation_rate_initial = variables_model_initial["Variation Rate"]
+variation_rate_initial_cst = Variation_rate_initial[1]
+Urban_demand_initial = variables_model_initial['Total Demanda Urbana']
+
+
+### APP START ###
 # Initialize the Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY, "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"], suppress_callback_exceptions=True)
 app.title = "Júcar River Basin Water Management"
@@ -258,7 +247,7 @@ def create_parameter_panel_Alarcon():
             # Option 1 : Dropdown for constant input 
             html.Div([
                 html.P("Set a constant Qeco:", className="text-center mt-1"),
-                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value,
+                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst,
                           style={"width": "100px", "text-align": "center", "margin": "0 auto"})
             ], id="qecolAlar-constant", style={"text-align": "center", "margin-bottom": "20px"}),
 
@@ -267,28 +256,28 @@ def create_parameter_panel_Alarcon():
                 html.P("Set a Qeco for each month:", className="text-center mt-1"),
                 html.Div([
                     dbc.Row([
-                        dbc.Col([html.Label("January"), dbc.Input(type="number", id="jan-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("February"), dbc.Input(type="number", id="feb-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("January"), dbc.Input(type="number", id="jan-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("February"), dbc.Input(type="number", id="feb-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("March"), dbc.Input(type="number", id="mar-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("April"), dbc.Input(type="number", id="apr-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("March"), dbc.Input(type="number", id="mar-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("April"), dbc.Input(type="number", id="apr-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("May"), dbc.Input(type="number", id="may-value",min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("June"), dbc.Input(type="number", id="jun-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("May"), dbc.Input(type="number", id="may-value",min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("June"), dbc.Input(type="number", id="jun-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("July"), dbc.Input(type="number", id="jul-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("August"), dbc.Input(type="number", id="aug-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("July"), dbc.Input(type="number", id="jul-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("August"), dbc.Input(type="number", id="aug-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("September"), dbc.Input(type="number", id="sep-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("October"), dbc.Input(type="number", id="octo-value",min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("September"), dbc.Input(type="number", id="sep-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("October"), dbc.Input(type="number", id="octo-value",min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("November"), dbc.Input(type="number", id="nov-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
-                        dbc.Col([html.Label("December"), dbc.Input(type="number", id="dec-value", min=0.0, max=10.0, step=0.1, value=initial_qecolAlar_value)], width=6),
+                        dbc.Col([html.Label("November"), dbc.Input(type="number", id="nov-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("December"), dbc.Input(type="number", id="dec-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
                     ])
                 ])
             ], id="qecolAlar-dynamic", 
@@ -315,13 +304,13 @@ def create_alarcon_page():
                     dcc.Graph(
                         id="outflow-graph",
                         figure={
-                            "data": [go.Scatter(x=months, y=initial_outflow, mode="lines", name="Outflow")],
+                            "data": [go.Scatter(x=time, y=Outflow_Jucar_initial, mode="lines", name="Outflow")],
                             "layout": go.Layout(title="Outflow Over Time", xaxis={"title": "Months"}, yaxis={"title": "hm³"})
                         },style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",}),
                     dcc.Graph(
                         id="deficit-graph",
                         figure={
-                            "data": [go.Scatter(x=months, y=initial_deficit, mode="lines", name="Deficit")],
+                            "data": [go.Scatter(x=time, y=DéfQecolAlar_initial, mode="lines", name="Deficit")],
                             "layout": go.Layout(title="Deficit Over Time (DéfQEcolAlar)", xaxis={"title": "Months"}, yaxis={"title": "hm³"})
                         },style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",}),
                 ],),)
@@ -393,7 +382,7 @@ def create_parameter_panel_population():
         #Dropdown  for variation rate input
         html.Div([
                 html.P("Set Variation rate:", className="text-center mt-1"),
-                dbc.Input(id="variation-rate-input",type="number", min=0.000, max=1.000, step=0.0001, value=initial_variation_rate,
+                dbc.Input(id="variation-rate-input",type="number", min=0.000, max=1.000, step=0.0001, value=variation_rate_initial_cst,
                           style={"width": "100px", "text-align": "center", "margin": "0 auto"})
                 ], id="variation-rate", style={"text-align": "center", "margin-bottom": "10px"}),
          #simulation button
@@ -418,7 +407,7 @@ def create_population_growth_page():
                                         html.Div([
                                                 dcc.Graph(id="demand-graph",
                                                     figure={
-                                                        "data": [go.Scatter(x=months, y=initial_urban_demand,mode="lines",name="Total Demanda Urbana",)],
+                                                        "data": [go.Scatter(x=time, y=Urban_demand_initial,mode="lines",name="Total Demanda Urbana",)],
                                                         "layout": go.Layout( title="Total Demanda Urbana", xaxis={"title": "Months"},yaxis={"title": "hm³"},legend={"orientation": "h", "x": 0,"y": 1.2, "xanchor": "left", "yanchor": "bottom", },margin={"l": 40, "r": 40, "t": 40, "b": 40},),  # Graph margin
                                                              },
                                                         ),
@@ -601,104 +590,83 @@ def toggle_input(input_type):
 def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
-
-    
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-    
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-    # Generate labels for all months and October-only
-    all_months_labels = []
-    october_labels = []
-    tickvals_october = []
-    for year_index, year in enumerate(range(start_year, end_year + 1)):
-        for month_index, month in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-            all_months_labels.append(f"{month} {year}")
-            if month == "Oct":
-                tickvals_october.append(year_index * 12 + month_index + 1)
-                october_labels.append(f"Oct {year}")
-    # Determine tick labels based on simulation length
-    if years_sim > 3:
-        tickvals = tickvals_october
-        ticktext = october_labels
-    else:
-        tickvals = list(range(1, len(all_months_labels) + 1))
-        ticktext = all_months_labels
+        
+        
 
     # Determine QecoAlar values based on input type
     if input_type == "option1":
-        qecolAlar_values = [constant_value] * 12
+        qecolAlar_values = [constant_value] * 12 * years_sim
+        Qeco_Alar = pd.Series(qecolAlar_values)
     else:
-        qecolAlar_values = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
-
-    # Update the Excel file
-    workbook = openpyxl.load_workbook("data.xlsx")
-    sheet = workbook["Demandas"]
-    column_name = "QecolAlar"
-
-    # Find the column index for QecolAlar
-    column_index = None
-    for col in sheet[2]:  # Assuming header is in row 2
-        if col.value == column_name:
-            column_index = col.column
-            break
-
-    if column_index is None:
-        raise ValueError("Column 'QecolAlar' not found in the Excel sheet.")
-
-    # Update the column with new values
-    current_row = 3  # Start from row 3
-    for year in range(years_sim):
-        for month_index in range(12):
-            sheet.cell(row=current_row, column=column_index).value = qecolAlar_values[month_index]
-            current_row += 1
-
-    # Save the workbook
-    workbook.save("data.xlsx")
-    upload_to_s3("data.xlsx", "mon-bucket-s3")
+        qeco = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
+        qecolAlar_values = qeco *years_sim
+        Qeco_Alar = pd.Series(qecolAlar_values)
 
     # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
-    variables_model = vensim_model.run(params={
-        'INITIAL TIME': 1,
-        'FINAL TIME': 12 * years_sim,
-        'TIME STEP': 1
-    })
+    variables_model = vensim_model.run(params={'INITIAL TIME': 1,'FINAL TIME': 12 * years_sim, 'TIME STEP': 1,  'QEcolAlar': Qeco_Alar})
+    variables_model.index = range(0, len(variables_model) ) #change the index because Vensim starts at 1 
+    variables_model['Mes'] = months_data
+    variables_model['Año'] = years_data
 
-    updated_outflow = variables_model['Sal Jucar']
-    updated_deficit = variables_model['DéfQecolAlar']
+    #generate a vector with value from start_year to end_year (the selected years)
+    #filter initial value
+    variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
+    Outflow_Jucar_initial_filtered = variables_model_initial_filtered['Sal Jucar']
+    DéfQecolAlar_initial_filtered = variables_model_initial_filtered['DéfQecolAlar']
+    #So filter for rows where "Año" is between start_year and end_year included
+    variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
+    Outflow_Jucar_updated = variables_model_updated['Sal Jucar']
+    DéfQecolAlar_updated = variables_model_updated['DéfQecolAlar']
+
+
+
+    # Determine tick labels based on simulation length
+    # Calculate the number of months based on the selected years
+    nb_years_sim = end_year - start_year + 1
+    all_months_list = list(variables_model_updated["Mes"])
+    all_years_list = list(variables_model_updated["Año"])
+    if nb_years_sim < 3:
+        #all months list
+        all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
+        ticktext = all_months_label  # Tick text corresponds to full month-year labels
+
+    else:
+        # Create a list with 'oct' if present in "Mes", otherwise ''
+        oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
+        ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
 
     # Create updated graphs
     outflow_figure = go.Figure()
     outflow_figure.add_trace(go.Scatter(
-        x=months, y=initial_outflow, mode="lines",
-        name=f"Initial Outflow (QecoAlar = {initial_qecolAlar_value})",
+        y=Outflow_Jucar_initial_filtered, mode="lines",
+        name=f"Initial Outflow (QecoAlar = {qecolAlar_initial_cst})",
         line=dict(dash="dot")
     ))
     outflow_figure.add_trace(go.Scatter(
-        x=months, y=updated_outflow, mode="lines",
+        y=Outflow_Jucar_updated, mode="lines",
         name="Updated Outflow"
     ))
     outflow_figure.update_layout(
         title="Outflow Over Time",
         xaxis=dict(title="Time",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
         yaxis=dict(title="hm³"),
+        
         margin=dict(l=40, r=40, t=40, b=40),
         template="plotly_white",
     )
 
     deficit_figure = go.Figure()
     deficit_figure.add_trace(go.Scatter(
-        x=months, y=initial_deficit, mode="lines",
-        name=f"Initial Deficit (QecoAlar = {initial_qecolAlar_value})",
+        y=DéfQecolAlar_initial_filtered, mode="lines",
+        name=f"Initial Deficit (QecoAlar = {qecolAlar_initial_cst})",
         line=dict(dash="dot")
     ))
     deficit_figure.add_trace(go.Scatter(
-        x=months, y=updated_deficit, mode="lines",
-        name="Updated Deficit"
+        y=DéfQecolAlar_updated, mode="lines",
+        name="Updated Deficit "
     ))
     deficit_figure.update_layout(
         title="Deficit Over Time",
@@ -736,45 +704,52 @@ def toggle_modal_population(icon_click, close_click, is_open):
 def update_population_graph(n_clicks, start_year, end_year, variation_rate):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-    
-    # Load and run the Vensim model
+        
+   
+    # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
-    #change Variation and Activate 
     variables_model = vensim_model.run(params={'INITIAL TIME': 1,'FINAL TIME': 12 * years_sim,'TIME STEP': 1,'Variation Rate': variation_rate, '"Activar/Desactivar"': 1,})
-    updated_urban_demand = variables_model['Total Demanda Urbana']
+    variables_model.index = range(0, len(variables_model) ) #change the index because Vensim starts at 1 
+    variables_model['Mes'] = months_data
+    variables_model['Año'] = years_data
     
-    # Generate labels for all months and October-only
-    all_months_labels = []
-    october_labels = []
-    tickvals_october = []
+    #generate a vector with value from start_year to end_year (the selected years)
+    #filter initial value
+    variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
+    updated_urban_demand_initial_filtered = variables_model_initial_filtered['Total Demanda Urbana']
 
-    for year_index, year in enumerate(range(start_year, end_year + 1)):
-        for month_index, month in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-            all_months_labels.append(f"{month} {year}")
-            if month == "Oct":
-                tickvals_october.append(year_index * 12 + month_index + 1)
-                october_labels.append(f"Oct {year}")
-
+    #So filter for rows where "Año" is between start_year and end_year included
+    variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
+    updated_urban_demand = variables_model_updated['Total Demanda Urbana']
+    
+    
+    
     # Determine tick labels based on simulation length
-    if years_sim > 3:
-        tickvals = tickvals_october
-        ticktext = october_labels
+    # Calculate the number of months based on the selected years
+    nb_years_sim = end_year - start_year + 1
+    all_months_list = list(variables_model_updated["Mes"])
+    all_years_list = list(variables_model_updated["Año"])
+    if nb_years_sim < 3:
+        #all months list
+        all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
+        ticktext = all_months_label  # Tick text corresponds to full month-year labels
+    
     else:
-        tickvals = list(range(1, len(all_months_labels) + 1))
-        ticktext = all_months_labels
-
+        # Create a list with 'oct' if present in "Mes", otherwise ''
+        oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
+        ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
+    
     # Create a Plotly figure for urban demand
     urban_demand_figure = go.Figure()
     # initial urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter(x=months,y=initial_urban_demand,mode="lines",name=f"Initial Urban Demand (Variation rate = {initial_variation_rate})",line=dict(dash="dot"),)
+        go.Scatter(y=updated_urban_demand,mode="lines",name=f"Initial Urban Demand (Variation rate = {variation_rate_initial_cst})",line=dict(dash="dot"),)
     )
     # updated urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter( x=months,y=updated_urban_demand, mode="lines",name=f"Updated Urban Demand (Variation rate = {variation_rate})",)
+        go.Scatter(y=updated_urban_demand_initial_filtered, mode="lines",name=f"Updated Urban Demand (Variation rate = {variation_rate})",)
     )
     # Customize the layout of the figure
     urban_demand_figure.update_layout(
@@ -800,39 +775,35 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
     if n_clicks is None or chosen_variable is None:
         raise dash.exceptions.PreventUpdate
 
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-
-    # Simulate the Vensim model to calculate the chosen variable
-    variable = variables_model_initial[chosen_variable]  
-
-    # Generate labels for all months and October-only
-    all_months_labels = []
-    october_labels = []
-    tickvals_october = []
-
-    for year_index, year in enumerate(range(start_year, end_year + 1)):
-        for month_index, month in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-            all_months_labels.append(f"{month} {year}")
-            if month == "Oct":
-                tickvals_october.append(year_index * 12 + month_index + 1)
-                october_labels.append(f"Oct {year}")
-
+    #generate a vector with value from start_year to end_year (the selected years)
+    #filter initial value
+    variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
+    variable_initial_filtered = variables_model_initial[chosen_variable] 
+ 
+    
     # Determine tick labels based on simulation length
-    if years_sim > 3:
-        tickvals = tickvals_october
-        ticktext = october_labels
+    # Calculate the number of months based on the selected years
+    nb_years_sim = end_year - start_year + 1
+    all_months_list = list(variables_model_initial_filtered["Mes"])
+    all_years_list = list(variables_model_initial_filtered["Año"])
+    if nb_years_sim < 3:
+        #all months list
+        all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
+        ticktext = all_months_label  # Tick text corresponds to full month-year labels
+    
     else:
-        tickvals = list(range(1, len(all_months_labels) + 1))
-        ticktext = all_months_labels
+        # Create a list with 'oct' if present in "Mes", otherwise ''
+        oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
+        ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
+    
 
     # Create the figure
     figure = go.Figure()
     figure.add_trace(
         go.Scatter(
-            x=months,
-            y=variable,
+            y=variable_initial_filtered,
             mode="lines",
             name=f"Updated {chosen_variable}",
         )
