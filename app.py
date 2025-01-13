@@ -709,45 +709,52 @@ def toggle_modal_population(icon_click, close_click, is_open):
 def update_population_graph(n_clicks, start_year, end_year, variation_rate):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-    
-    # Load and run the Vensim model
+        
+   
+    # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
-    #change Variation and Activate 
     variables_model = vensim_model.run(params={'INITIAL TIME': 1,'FINAL TIME': 12 * years_sim,'TIME STEP': 1,'Variation Rate': variation_rate, '"Activar/Desactivar"': 1,})
-    updated_urban_demand = variables_model['Total Demanda Urbana']
+    variables_model.index = range(0, len(variables_model) ) #change the index because Vensim starts at 1 
+    variables_model['Mes'] = months_data
+    variables_model['Año'] = years_data
     
-    # Generate labels for all months and October-only
-    all_months_labels = []
-    october_labels = []
-    tickvals_october = []
+    #generate a vector with value from start_year to end_year (the selected years)
+    #filter initial value
+    variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
+    updated_urban_demand_initial_filtered = variables_model_initial_filtered['Total Demanda Urbana']
 
-    for year_index, year in enumerate(range(start_year, end_year + 1)):
-        for month_index, month in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-            all_months_labels.append(f"{month} {year}")
-            if month == "Oct":
-                tickvals_october.append(year_index * 12 + month_index + 1)
-                october_labels.append(f"Oct {year}")
-
+    #So filter for rows where "Año" is between start_year and end_year included
+    variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
+    updated_urban_demand = variables_model_updated['Total Demanda Urbana']
+    
+    
+    
     # Determine tick labels based on simulation length
-    if years_sim > 3:
-        tickvals = tickvals_october
-        ticktext = october_labels
+    # Calculate the number of months based on the selected years
+    nb_years_sim = end_year - start_year + 1
+    all_months_list = list(variables_model_updated["Mes"])
+    all_years_list = list(variables_model_updated["Año"])
+    if nb_years_sim < 3:
+        #all months list
+        all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
+        ticktext = all_months_label  # Tick text corresponds to full month-year labels
+    
     else:
-        tickvals = list(range(1, len(all_months_labels) + 1))
-        ticktext = all_months_labels
-
+        # Create a list with 'oct' if present in "Mes", otherwise ''
+        oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
+        ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
+    
     # Create a Plotly figure for urban demand
     urban_demand_figure = go.Figure()
     # initial urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter(x=months,y=Urban_demand_initial,mode="lines",name=f"Initial Urban Demand (Variation rate = {Urban_demand_initial})",line=dict(dash="dot"),)
+        go.Scatter(y=updated_urban_demand,mode="lines",name=f"Initial Urban Demand (Variation rate = {variation_rate_initial_cst})",line=dict(dash="dot"),)
     )
     # updated urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter( x=months,y=updated_urban_demand, mode="lines",name=f"Updated Urban Demand (Variation rate = {variation_rate})",)
+        go.Scatter(y=updated_urban_demand_initial_filtered, mode="lines",name=f"Updated Urban Demand (Variation rate = {variation_rate})",)
     )
     # Customize the layout of the figure
     urban_demand_figure.update_layout(
@@ -773,39 +780,35 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
     if n_clicks is None or chosen_variable is None:
         raise dash.exceptions.PreventUpdate
 
-    # Calculate the number of months based on the selected years
-    years_sim = end_year - start_year + 1
-    months = np.arange(1, 12 * years_sim + 1)
-
-    # Simulate the Vensim model to calculate the chosen variable
-    variable = variables_model_initial[chosen_variable]  
-
-    # Generate labels for all months and October-only
-    all_months_labels = []
-    october_labels = []
-    tickvals_october = []
-
-    for year_index, year in enumerate(range(start_year, end_year + 1)):
-        for month_index, month in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-            all_months_labels.append(f"{month} {year}")
-            if month == "Oct":
-                tickvals_october.append(year_index * 12 + month_index + 1)
-                october_labels.append(f"Oct {year}")
-
+    #generate a vector with value from start_year to end_year (the selected years)
+    #filter initial value
+    variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
+    variable_initial_filtered = variables_model_initial[chosen_variable] 
+ 
+    
     # Determine tick labels based on simulation length
-    if years_sim > 3:
-        tickvals = tickvals_october
-        ticktext = october_labels
+    # Calculate the number of months based on the selected years
+    nb_years_sim = end_year - start_year + 1
+    all_months_list = list(variables_model_initial_filtered["Mes"])
+    all_years_list = list(variables_model_initial_filtered["Año"])
+    if nb_years_sim < 3:
+        #all months list
+        all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
+        ticktext = all_months_label  # Tick text corresponds to full month-year labels
+    
     else:
-        tickvals = list(range(1, len(all_months_labels) + 1))
-        ticktext = all_months_labels
+        # Create a list with 'oct' if present in "Mes", otherwise ''
+        oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
+        tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
+        ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
+    
 
     # Create the figure
     figure = go.Figure()
     figure.add_trace(
         go.Scatter(
-            x=months,
-            y=variable,
+            y=variable_initial_filtered,
             mode="lines",
             name=f"Updated {chosen_variable}",
         )
