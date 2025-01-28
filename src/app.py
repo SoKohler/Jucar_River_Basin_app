@@ -8,13 +8,14 @@ source documentation : https://dash-bootstrap-components.opensource.faculty.ai/d
 http://127.0.0.1:8050
 
 """
+# import os
+# os.chdir(r'C:\Users\sophi\myCloud\Sophia\Thesis\Model\Jucar_model\Adrià\App_Dash\src')
 # Import libraries and modules
 import pandas as pd
 import pysd
 import dash
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
-
 import plotly.graph_objs as go
 
 """in this version I will not modify the excel sheet but directly work with the variable saved in Vensim
@@ -55,81 +56,77 @@ variation_rate_initial_cst = Variation_rate_initial[1]
 Urban_demand_initial = variables_model_initial['Total Demanda Urbana']
 
 
-### APP START ###
 # Initialize the Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY, "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"], suppress_callback_exceptions=True)
-app.title = "Júcar River Basin Water Management"
+app.title = "Gestión del Agua en la Cuenca del Río Júcar"
 server = app.server
+
 # Define reusable page components
 #### 1. Home page
 def create_home_page():
     return html.Div([
-        html.H1("Júcar River Basin Management Tool", className="text-center mt-0"),
-        html.P("Welcome to the Júcar River Basin System Dynamics Model. This tool provides an interactive platform "
-               "to analyze and simulate the behavior of the Júcar River Basin under various scenarios."),
-        html.H2("Content", className="mt-4"),
+        html.H1("Herramienta de Gestión de la Cuenca del Río Júcar", className="text-center mt-0"),
+        html.P("Bienvenido a la Herramienta de Gestión Dinámica del Sistema de la Cuenca del Río Júcar. Esta plataforma interactiva permite analizar y simular el comportamiento de la cuenca bajo diferentes escenarios."),
+        html.H2("Contenido", className="mt-4"),
         html.Ul([
-            html.Li("1. Model presentation - see how the model is formed"),
-            html.Li("2. Alarcón’s Reservoir - Environmental flow simulation"),
-            html.Li("3. Population Growth Analysis"),
-            html.Li("4. Diverse Graphs"),
-            html.Li("jgfodijgoidjfgoijdfgjfoigjofjfjg"),
+            html.Li("1. Presentación del modelo: descubre cómo está estructurado."),
+            html.Li("2. Embalse de Alarcón: simulación de caudal ambiental."),
+            html.Li("3. Análisis del Crecimiento Poblacional."),
+            html.Li("4. Diversidad de Gráficos."),
         ]),
-        html.H2("User Guide", className="mt-4"),
+        html.H2("Guía del Usuario", className="mt-4"),
         html.Ol([
-            html.Li("Navigate using the menu on the left."),
-            html.Li("Adjust variables using sliders or select different scenarios using dropdown menus."),
-            html.Li("Run simulations to analyze results."),
+            html.Li("Navegue por el menú a la izquierda."),
+            html.Li("Ajuste variables con los deslizadores o seleccione escenarios con los menús desplegables."),
+            html.Li("Ejecute simulaciones para analizar resultados."),
         ])
     ])
-
 
 #### 2. Model presentation page
 def create_model_presentation():
     return html.Div([
-        html.H1("Júcar River Basin Management Tool", className="text-center mt-0"),
+        html.H1("Herramienta de Gestión de la Cuenca del Río Júcar", className="text-center mt-0"),
         dbc.Tabs(
             [
-                dbc.Tab(label="View 1: SYSTEM NETWORK", children=[
-                    html.P("Overview of the model"),
+                dbc.Tab(label="Vista 1: Red del Sistema", children=[
+                    html.P("Descripción general del modelo"),
                     html.Img(src="/assets/View_1.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
-                dbc.Tab(label="Aquifer", children=[
-                    html.P("View 2: MANCHA ORIENTAL AQUIFER"),
+                dbc.Tab(label="Vista 2: Acuífero Mancha Oriental", children=[
+                    html.P("Información sobre el acuífero Mancha Oriental"),
                     html.Img(src="/assets/View_2.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
-                dbc.Tab(label="Water demand, supply and deficit", children=[
-                    html.P("View 3: WATER DEMAND, SUPPLY AND DEFICIT"),
+                dbc.Tab(label="Vista 3: Demanda, Suministro y Déficit de Agua", children=[
+                    html.P("Análisis de la demanda, el suministro y el déficit en la cuenca"),
                     html.Img(src="/assets/View_3.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
-                dbc.Tab(label="Reservoirs operating rules", children=[
-                    html.P("View 4: RESERVOIRS OPERATING RULES"),
+                dbc.Tab(label="Vista 4: Reglas de Operación de Embalses", children=[
+                    html.P("Reglas de operación de los embalses"),
                     html.Img(src="/assets/View_4.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
-                dbc.Tab(label="State index", children=[
-                    html.P("View 5: STATE INDEX"),
+                dbc.Tab(label="Vista 5: Índice del Estado", children=[
+                    html.P("Visualización del índice del estado del sistema"),
                     html.Img(src="/assets/View_5.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
-                dbc.Tab(label="Crops", children=[
-                    html.P("View : CROPS"),
+                dbc.Tab(label="Cultivos", children=[
+                    html.P("Información sobre cultivos relacionados con el sistema"),
                     html.Img(src="/assets/Crops.PNG", style={"width": "100%", "margin": "auto", "display": "block"})
                 ]),
             ]
         )
     ])
 
-#### 3. Alarcon page
-## 3.1 Modal : parameters explanation
+#### 3. Página del Embalse de Alarcón
 def create_modal_Alarcon_Qeco():
     modal_Alarcon = html.Div([
             html.Div([
                     html.P(
-                        "Parameter : QEcolAlar",
+                        "Parámetro: QEcolAlar",
                         style={"display": "inline-block","margin-right": "5px","text-align": "center"},
                     ),
                     html.I(
                         className="bi bi-info-circle",
-                        id="info-icon-Alarcon-Qeco",  # This ID is used to open the modal
+                        id="info-icon-Alarcon-Qeco",  # Este ID se utiliza para abrir el modal
                         style={"fontSize": "0.9rem","color": "#0f375e","cursor": "pointer",},
                     ),
                 ],
@@ -137,29 +134,29 @@ def create_modal_Alarcon_Qeco():
             ),
             # Modal
             dbc.Modal([
-                    dbc.ModalHeader(dbc.ModalTitle("Explanation")),
+                    dbc.ModalHeader(dbc.ModalTitle("Explicación")),
                     dbc.ModalBody(
                         html.Div(
                             [
                                 html.P(
-                                    "QEcolAlar: This is the environmental flow downstream of Alarcón's reservoir. "
-                                    "It is based on hydrological, operational, and environmental factors."
-                                    "This is the Causal diagram :"
-                                ),
-                                html.Img(src="/assets/QecoAlar_tree.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagram of QEcolAlar parameter",),
+                                    "QEcolAlar: Este es el caudal ambiental aguas abajo del embalse de Alarcón. "
+                                    "Se basa en factores hidrológicos, operativos y ambientales."
+                                    "Este es el diagrama causal:")
+                                ,
+                                html.Img(src="/assets/QecoAlar_tree.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
                                 html.P(
-                                    "In red is it the parameter Qeco in the System Dynamic Model "
-                                    "In green are the two outputs of the simulation (see graph)"
-                                    "Sal Jucar : the ouflow "
-                                    "DéfQecolAlar : the deficit regarding the environmental flow " 
+                                    "En rojo se encuentra el parámetro Qeco en el Modelo Dinámico de Sistemas. "
+                                    "En verde están las dos salidas de la simulación (ver gráfico): "
+                                    "Sal Júcar: el caudal de salida "
+                                    "DéfQecolAlar: el déficit respecto al caudal ambiental " 
                                 ),
-                                html.Img(src="/assets/Output.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagram of QEcolAlar parameter",),
+                                html.Img(src="/assets/Output.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
                             ]
                         ),
                     ),
                     dbc.ModalFooter(
                         dbc.Button(
-                            "Close", id="close-Alarcon-Qeco", className="ms-auto", n_clicks=0
+                            "Cerrar", id="close-Alarcon-Qeco", className="ms-auto", n_clicks=0
                         )
                     ),
                 ],
@@ -174,12 +171,12 @@ def create_modal_Alarcon_inputs():
     modal_Alarcon = html.Div([
             html.Div([
                     html.H5(
-                        "Select input type ",
+                        "Seleccione el tipo de entrada",
                         style={"display": "inline-block","margin-right": "5px","margin-top": "5px"},
                     ),
                     html.I(
                         className="bi bi-info-circle",
-                        id="info-icon-Alarcon-inputs",  # ID  to open the modal
+                        id="info-icon-Alarcon-inputs",  # ID para abrir el modal
                         style={"fontSize": "0.7rem","color": "#0f375e","cursor": "pointer",},
                     ),
                     html.P(
@@ -190,16 +187,16 @@ def create_modal_Alarcon_inputs():
             ),
             # Modal
             dbc.Modal([
-                    dbc.ModalHeader(dbc.ModalTitle("Explanation of Parameters")),
+                    dbc.ModalHeader(dbc.ModalTitle("Explicación de Parámetros")),
                     dbc.ModalBody(
                         html.Div([
-                                html.P([html.B("Constant"), " : means QEcolAlar is constant over the months."]),
-                                html.P([html.B("Montly dynamic"), " : means QEcolAlar can be modified for more flexibility for each month."]),
+                                html.P([html.B("Constante"), " : significa que QEcolAlar es constante durante los meses."]),
+                                html.P([html.B("Dinámico Mensual"), " : significa que QEcolAlar puede modificarse con más flexibilidad cada mes."]),
                             ]
                         )
                     ),
                     dbc.ModalFooter(
-                        dbc.Button("Close", id="close-Alarcon-inputs", className="ms-auto", n_clicks=0)
+                        dbc.Button("Cerrar", id="close-Alarcon-inputs", className="ms-auto", n_clicks=0)
                     ),
                 ],
                 id="modal-Alarcon-inputs",
@@ -210,115 +207,112 @@ def create_modal_Alarcon_inputs():
     return modal_Alarcon
 
 
-# 3.2 Parameter panel
+# 3.2 Panel de parameter
 def create_parameter_panel_Alarcon():
     return html.Div([
-        html.H3("Parameter Settings", className="text-center mt-3"),
+        html.H3("Configuración de parámetros", className="text-center mt-3",style={"font-size": "27px"}),
         create_modal_Alarcon_Qeco(),
-        # Dropdowns for year range selection
+        # Selección de rango de años para simulación
         html.Div([
             html.Div([
-                html.P("Select simulation range:", className="text-center mt-1"),
+                html.P("Seleccione el rango de simulación:", className="text-center mt-1"),
                 dbc.Row([
                     dbc.Col([
-                        html.Label("Start Year"),
-                        dcc.Dropdown(id="start-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2003,clearable=False,style={"width": "100%"}) ], width=6),
+                        html.Label("Inicio"),
+                        dcc.Dropdown(id="start-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2003,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"}) ], width=6,style={"text-align": "center"}),
                     dbc.Col([
-                        html.Label("End Year"),
-                        dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"width": "100%"})], width=6),
+                        html.Label("Fin"),
+                        dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
                 ], className="mb-3")
             ], style={"margin-bottom": "20px"}),
 
-            # choose between constant or dynamic dropdown
+            # Elija entre entrada constante o dinámica
             create_modal_Alarcon_inputs(),
             dbc.RadioItems(
                 id="qecolAlar-selector",
                 options=[
-                    {"label": "Constant", "value": "option1"},
-                    {"label": "Monthly dynamic", "value": "option2"},
+                    {"label": "Constante", "value": "option1"},
+                    {"label": "Dinámico Mensual", "value": "option2"},
                 ],
                 inline=True,
-                value="option1",# Default selection
+                value="option1",# Selección predeterminada
                 style={"margin-left": "18px"},
                 className="mb-3"
             ),
-            html.Hr(style={"border": "1px solid black","margin-bottom": "20px","margin-top": "25px"}), #black horizontal line
+            html.Hr(style={"border": "1px solid black","margin-bottom": "20px","margin-top": "25px"}), # Línea horizontal negra
             
-            # Option 1 : Dropdown for constant input 
+            # Opción 1 : Desplegable para entrada constante
             html.Div([
-                html.P("Set a constant Qeco:", className="text-center mt-1"),
-                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst,
+                html.P("Establezca un QEcol constante:", className="text-center mt-1"),
+                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=1.0,
                           style={"width": "100px", "text-align": "center", "margin": "0 auto"})
             ], id="qecolAlar-constant", style={"text-align": "center", "margin-bottom": "20px"}),
 
-            # Option 2 : Dynamic dropdown for 12 months for dynamic input
+            # Opción 2 : Desplegables dinámicos para 12 meses
             html.Div([
-                html.P("Set a Qeco for each month:", className="text-center mt-1"),
+                html.P("Establezca un QEcol para cada mes:", className="text-center mt-1"),
                 html.Div([
                     dbc.Row([
-                        dbc.Col([html.Label("January"), dbc.Input(type="number", id="jan-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("February"), dbc.Input(type="number", id="feb-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Enero"), dbc.Input(type="number", id="jan-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Febrero"), dbc.Input(type="number", id="feb-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("March"), dbc.Input(type="number", id="mar-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("April"), dbc.Input(type="number", id="apr-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Marzo"), dbc.Input(type="number", id="mar-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Abril"), dbc.Input(type="number", id="apr-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("May"), dbc.Input(type="number", id="may-value",min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("June"), dbc.Input(type="number", id="jun-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Mayo"), dbc.Input(type="number", id="may-value",min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Junio"), dbc.Input(type="number", id="jun-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("July"), dbc.Input(type="number", id="jul-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("August"), dbc.Input(type="number", id="aug-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Julio"), dbc.Input(type="number", id="jul-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Agosto"), dbc.Input(type="number", id="aug-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("September"), dbc.Input(type="number", id="sep-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("October"), dbc.Input(type="number", id="octo-value",min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Septiembre"), dbc.Input(type="number", id="sep-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Octubre"), dbc.Input(type="number", id="octo-value",min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ], className="mb-2"),
                     dbc.Row([
-                        dbc.Col([html.Label("November"), dbc.Input(type="number", id="nov-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
-                        dbc.Col([html.Label("December"), dbc.Input(type="number", id="dec-value", min=0.0, max=10.0, step=0.1, value=qecolAlar_initial_cst)], width=6),
+                        dbc.Col([html.Label("Noviembre"), dbc.Input(type="number", id="nov-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
+                        dbc.Col([html.Label("Diciembre"), dbc.Input(type="number", id="dec-value", min=0.0, max=10.0, step=0.1, value=1.0)], width=6),
                     ])
                 ])
             ], id="qecolAlar-dynamic", 
                 style={"display": "none", "margin-bottom": "20px","margin-top": "20px"},
                 className="text-center mt-0"),
             
-            #simulation button
+            # Botón de simulación
             html.Div([
-                dbc.Button("Run Simulation", id="run-simulation", color="primary",className="text-center mt-0")
+                dbc.Button("Ejecutar Simulación", id="run-simulation", color="primary",className="text-center mt-0")
             ],  style={"display": "flex", "justify-content": "center","align-items": "center", "margin-top": "20px",  "margin-bottom": "20px"})
         ], className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"}),
         
-    ], style={"maxWidth": "600px", "margin": "20px auto","boxShadow": "0 4px 8px rgba(0,0,0,0.1)","backgroundColor": "#dbe1e7","borderRadius": "8px","padding": "25px"})
-
+        ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
 def create_alarcon_page():
     return dbc.Container(fluid=True,children=[
-        html.H1("Alarcón’s Reservoir", className="text-center mt-0"),
+        html.H1("Embalse de Alarcón", className="text-center mt-0"),
         dbc.Row([
-            dbc.Col(create_parameter_panel_Alarcon(), width=3),
+            dbc.Col(create_parameter_panel_Alarcon(), width=4),
             dbc.Col([
                 dbc.Spinner(
                 html.Div([
                     dcc.Graph(
                         id="outflow-graph",
                         figure={
-                            "data": [go.Scatter(x=time, y=Outflow_Jucar_initial, mode="lines", name="Outflow")],
-                            "layout": go.Layout(title="Outflow Over Time", xaxis={"title": "Months"}, yaxis={"title": "hm³"})
-                        },style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",}),
+                            "data": [go.Scatter(x=[], y=[], mode="lines", name="Salida")],
+                            "layout": go.Layout(title="Salida a lo largo del tiempo", xaxis={"title": "Meses"}, yaxis={"title": "hm³"})
+                        }),
                     dcc.Graph(
                         id="deficit-graph",
                         figure={
-                            "data": [go.Scatter(x=time, y=DéfQecolAlar_initial, mode="lines", name="Deficit")],
-                            "layout": go.Layout(title="Deficit Over Time (DéfQEcolAlar)", xaxis={"title": "Months"}, yaxis={"title": "hm³"})
-                        },style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",}),
+                            "data": [go.Scatter(x=[], y=[], mode="lines", name="Déficit")],
+                            "layout": go.Layout(title="Déficit a lo largo del tiempo", xaxis={"title": "Meses"}, yaxis={"title": "hm³"})
+                        }),
                 ],),)
-                
-            ], width=9),
+            ], width=8),
         ])
     ])
-
 
 #### 4. Population growth simulation page
 ## 4.1 Modal : parameters explanation
@@ -326,7 +320,7 @@ def create_modal_population():
     modal_population = html.Div([
             html.Div([
                     html.P(
-                        "Parameter : Variation rate",
+                        "Parámetro : Variation rate",
                         style={"display": "inline-block","margin-right": "5px","text-align": "center"},
                     ),
                     html.I(
@@ -338,14 +332,14 @@ def create_modal_population():
             ),
             # Modal
             dbc.Modal([
-                    dbc.ModalHeader(dbc.ModalTitle("Explanation")),
+                    dbc.ModalHeader(dbc.ModalTitle("Explicación")),
                     dbc.ModalBody(
                         html.Div([
                                 html.P(
-                                    "Variation rate: Simulate the population growth for Valencia and Sagunto."
+                                    "Variation rate: Simular el crecimiento de la población de Valencia y Sagunto."
                                     "This is the Causal diagrams :"
                                     ),
-                                html.Img(src="/assets/links_variation_rate.png", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagram of Variation rate parameter",),
+                                html.Img(src="/assets/links_variation_rate.png", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro Variation rate",),
                             ]
                         ),
                     ),
@@ -364,24 +358,24 @@ def create_modal_population():
 ## 4.2 parameter panel
 def create_parameter_panel_population():
     return html.Div([
-        html.H3("Parameter Settings", className="text-center mt-3"),
+        html.H3("Configuración de parámetros", className="text-center mt-3",style={"font-size": "27px"}),
         create_modal_population(),
         # Dropdowns for year range selection
         html.Div([
-            html.P("Select simulation range:", className="text-center mt-1"),
+        html.Div([
+            html.P("Seleccione el rango de simulación:", className="text-center mt-1"),
             dbc.Row([
                 dbc.Col([
-                    html.Label("Start Year"),
-                    dcc.Dropdown(id="start-year", options=[{"label": str(year), "value": year} for year in range(2003, 2014)], value=2003, clearable=False, style={"width": "100%"} )], width=6),
+                    html.Label("Inicio"),
+                    dcc.Dropdown(id="start-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2003,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"}) ], width=6,style={"text-align": "center"}),
                 dbc.Col([
-                    html.Label("End Year"),
-                    dcc.Dropdown(id="end-year", options=[{"label": str(year), "value": year} for year in range(2003, 2014)], value=2013,  clearable=False,  style={"width": "100%"} )], width=6),
+                    html.Label("Fin"),
+                    dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
             ], className="mb-3")
         ], style={"margin-bottom": "20px"}),
-        html.Div([
         #Dropdown  for variation rate input
         html.Div([
-                html.P("Set Variation rate:", className="text-center mt-1"),
+                html.P("Establecer Variation rate:", className="text-center mt-1"),
                 dbc.Input(id="variation-rate-input",type="number", min=0.000, max=1.000, step=0.0001, value=variation_rate_initial_cst,
                           style={"width": "100px", "text-align": "center", "margin": "0 auto"})
                 ], id="variation-rate", style={"text-align": "center", "margin-bottom": "10px"}),
@@ -390,20 +384,19 @@ def create_parameter_panel_population():
                     dbc.Button("Run Simulation", id="run-simulation", color="primary",className="text-center mt-0")
                 ],  style={"display": "flex", "justify-content": "center","align-items": "center", "margin-top": "20px",  "margin-bottom": "20px"})
                 ],className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"})
-        ], style={"maxWidth": "600px", "margin": "20px auto", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","backgroundColor": "#dbe1e7","borderRadius": "8px","padding": "25px"})
-
+        ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
 
 
 def create_population_growth_page():
     return dbc.Container(fluid=True,children=[
-            html.H1("Population Growth Analysis", className="text-center mt-0"),
+            html.H1("Análisis del crecimiento demográfico", className="text-center mt-0"),
             dbc.Row([
-                    dbc.Col(create_parameter_panel_population(), width=3),
+                    dbc.Col(create_parameter_panel_population(), width=4),
                     dbc.Col([
                             dbc.Spinner(
                                 html.Div([
-                                        html.P("Population Growth Dynamics: Analyze how population growth impacts urban demand."),
+                                        html.P("Dinámica del crecimiento demográfico: Analizar cómo influye el crecimiento demográfico en la demanda urbana."),
                                         html.Div([
                                                 dcc.Graph(id="demand-graph",
                                                     figure={
@@ -414,7 +407,7 @@ def create_population_growth_page():
                                                 ],style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",},),
                                         ])
                                         )
-                            ], width=9,),
+                            ], width=8,),
                     ]),
             ],)
 ### 5. Diverse Graphs pages
@@ -422,36 +415,38 @@ def create_population_growth_page():
 def create_parameter_panel_divers():
     variable_headers = list(variables_model_initial.columns)  
     return html.Div([
-        html.H3("Parameter Settings", className="text-center mt-3"),
+        html.H3("Configuración de parámetros", className="text-center mt-3",style={"font-size": "27px"}),
         # Dropdowns for year range selection
         html.Div([
-            html.P("Select simulation range:", className="text-center mt-1"),
+        html.Div([
+            html.P("Seleccione el rango de simulación:", className="text-center mt-1"),
             dbc.Row([
                 dbc.Col([
-                    html.Label("Start Year"),
-                    dcc.Dropdown(id="start-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2003,clearable=False,style={"width": "100%"}  )], width=6),
+                    html.Label("Inicio"),
+                    dcc.Dropdown(id="start-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2003,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"}) ], width=6,style={"text-align": "center"}),
                 dbc.Col([
-                    html.Label("End Year"),
-                    dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003, 2014)],value=2013,clearable=False,style={"width": "100%"} )], width=6),
+                    html.Label("Fin"),
+                    dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
             ], className="mb-3")
         ], style={"margin-bottom": "20px"}),
         # Dropdown to select a variable
         html.Div([
-            html.P("Select a graph variable:", className="text-center mt-1"),
-            dbc.Select(id="selected",options=[{"label": header, "value": header} for header in variable_headers],placeholder="Select a graph variable", style={"width": "100%", "text-align": "center", "margin": "0 auto"} )
+            html.P("Seleccionar una variable del gráfico:", className="text-center mt-1"),
+            dbc.Select(id="selected",options=[{"label": header, "value": header} for header in variable_headers],placeholder="Seleccionar una variable del gráfico", style={"width": "100%", "text-align": "center", "margin": "0 auto"} )
         ], style={"text-align": "center", "margin-bottom": "10px"}),
 
         # Simulation button
         html.Div([
-            dbc.Button("Run Simulation", id="run-simulation", color="primary", className="text-center mt-0")
+            dbc.Button("Ejecutar Simulación", id="run-simulation", color="primary", className="text-center mt-0")
         ], style={"display": "flex", "justify-content": "center", "align-items": "center", "margin-top": "20px", "margin-bottom": "20px"})
-    ], style={"maxWidth": "600px", "margin": "20px auto", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)", "backgroundColor": "#dbe1e7", "borderRadius": "8px", "padding": "25px"})
+        ],className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"})
+        ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
 def create_divers_graphs_page():
     return dbc.Container(fluid=True,children=[
-            html.H1("Diverse Graphs", className="text-center mt-0"),
+            html.H1("Diversos gráficos", className="text-center mt-0"),
             dbc.Row([
-                    dbc.Col(create_parameter_panel_divers(), width=3),
+                    dbc.Col(create_parameter_panel_divers(), width=4),
                     dbc.Col([
                             dbc.Spinner(
                                 html.Div([
@@ -459,22 +454,22 @@ def create_divers_graphs_page():
                                                 dcc.Graph(id="divers-graph", figure={},),
                                                 ],style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",},),
                                         ])
-                                        )], width=9,),]),],)
+                                        )], width=8,),]),],)
 
 # Navigation menu
 def create_menu():
     return dbc.Nav(
         [
-            dbc.NavLink("Home", href="/", active="exact", className="dropdown-item"),
-            dbc.NavLink("Model presentation", href="/model", active="exact", className="dropdown-item"),
-            dbc.NavLink("Alarcón’s Reservoir", href="/alarcon", active="exact", className="dropdown-item"),
-            dbc.NavLink("Population Growth", href="/population-growth", active="exact", className="dropdown-item"),
-            dbc.NavLink("Diverse Graphs", href="/diverse-graphs", active="exact", className="dropdown-item"),
+            dbc.NavLink("Inicio", href="/", active="exact", className="dropdown-item"),
+            dbc.NavLink("Presentación del Modelo", href="/model", active="exact", className="dropdown-item"),
+            dbc.NavLink("Embalse de Alarcón", href="/alarcon", active="exact", className="dropdown-item"),
+            dbc.NavLink("Crecimiento Poblacional", href="/population-growth", active="exact", className="dropdown-item"),
+            dbc.NavLink("Diversos gráficos", href="/diverse-graphs", active="exact", className="dropdown-item"),
         ],
         pills=True,
         vertical=True,
         className="navbar",
-        style={"width": "250px","position": "fixed","left": "0","top": "0","background-color": "#f8f9fa","padding": "45px 10px","box-shadow": "2px 0 5px rgba(0,0,0,0.1)",},
+        style={"width": "215px","font-size": "15px","position": "fixed","left": "0","top": "0","background-color": "#f8f9fa","padding": "45px 10px","box-shadow": "2px 0 5px rgba(0,0,0,0.1)", },
     )
 
 
@@ -497,7 +492,7 @@ def update_page(pathname):
     return html.Div("404: Page Not Found")
 # Layout
 app.layout = html.Div([
-    dbc.Button("Menu", id="menu-toggle", color="primary", className="mb-2", style={"position": "fixed", "top": "10px", "left": "10px", "zIndex": 1000}),
+    dbc.Button("Menú", id="menu-toggle", color="primary", className="mb-2", style={"position": "fixed", "top": "10px", "left": "10px", "zIndex": 1000}),
     dbc.Collapse(create_menu(), id="menu-collapse", is_open=False),
     html.Div([
         dcc.Location(id="url"),
@@ -642,16 +637,16 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
     outflow_figure = go.Figure()
     outflow_figure.add_trace(go.Scatter(
         y=Outflow_Jucar_initial_filtered, mode="lines",
-        name=f"Initial Outflow (QecoAlar = {qecolAlar_initial_cst})",
+        name=f"Salida inicial (QecoAlar = {qecolAlar_initial_cst})",
         line=dict(dash="dot")
     ))
     outflow_figure.add_trace(go.Scatter(
         y=Outflow_Jucar_updated, mode="lines",
-        name="Updated Outflow"
+        name="Salida actualizada"
     ))
     outflow_figure.update_layout(
-        title="Outflow Over Time",
-        xaxis=dict(title="Time",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
+        title="Salida a lo largo del tiempo",
+        xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
         yaxis=dict(title="hm³"),
         
         margin=dict(l=40, r=40, t=40, b=40),
@@ -661,16 +656,16 @@ def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_v
     deficit_figure = go.Figure()
     deficit_figure.add_trace(go.Scatter(
         y=DéfQecolAlar_initial_filtered, mode="lines",
-        name=f"Initial Deficit (QecoAlar = {qecolAlar_initial_cst})",
+        name=f"Déficit inicial (QecoAlar = {qecolAlar_initial_cst})",
         line=dict(dash="dot")
     ))
     deficit_figure.add_trace(go.Scatter(
         y=DéfQecolAlar_updated, mode="lines",
-        name="Updated Deficit "
+        name="Déficit actualizada"
     ))
     deficit_figure.update_layout(
-        title="Deficit Over Time",
-        xaxis=dict(title="Time",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
+        title="Déficit a lo largo del tiempo",
+        xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
         yaxis=dict(title="hm³"),
         margin=dict(l=40, r=40, t=40, b=40),
         template="plotly_white",
@@ -745,16 +740,16 @@ def update_population_graph(n_clicks, start_year, end_year, variation_rate):
     urban_demand_figure = go.Figure()
     # initial urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter(y=updated_urban_demand,mode="lines",name=f"Initial Urban Demand (Variation rate = {variation_rate_initial_cst})",line=dict(dash="dot"),)
+        go.Scatter(y=updated_urban_demand,mode="lines",name=f"Demanda urbana inicial (Variation rate = {variation_rate_initial_cst})",line=dict(dash="dot"),)
     )
     # updated urban demand trace
     urban_demand_figure.add_trace(
-        go.Scatter(y=updated_urban_demand_initial_filtered, mode="lines",name=f"Updated Urban Demand (Variation rate = {variation_rate})",)
+        go.Scatter(y=updated_urban_demand_initial_filtered, mode="lines",name=f"Demanda urbana actualizada (Variation rate = {variation_rate})",)
     )
     # Customize the layout of the figure
     urban_demand_figure.update_layout(
-        title="Urban Demand Over Time",
-        xaxis=dict(title="Time", tickmode="array", tickvals=tickvals,  ticktext=ticktext, rangeslider=dict(visible=True), ),
+        title="Demanda urbana a lo largo del tiempo",
+        xaxis=dict(title="Tiempo", tickmode="array", tickvals=tickvals,  ticktext=ticktext, rangeslider=dict(visible=True), ),
         yaxis=dict(title="hm³"),
         margin=dict(l=40, r=40, t=40, b=40),
         template="plotly_white",
@@ -805,14 +800,14 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
         go.Scatter(
             y=variable_initial_filtered,
             mode="lines",
-            name=f"Updated {chosen_variable}",
+            name=f"{chosen_variable} actualizado",
         )
     )
 
     # Update layout with dynamic tick values and labels
     figure.update_layout(
         title={
-        "text": f"{chosen_variable} Over Time",
+        "text": f"{chosen_variable} a lo largo del tiempo",
         "x": 0.5,  # Center the title
         "xanchor": "center",  # Ensure proper alignment
         "yanchor": "top",  # Keep it at the top
