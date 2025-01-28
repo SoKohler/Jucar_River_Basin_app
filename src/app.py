@@ -150,7 +150,7 @@ def create_modal_Alarcon_Qeco():
                                     "Sal Júcar: el caudal de salida "
                                     "DéfQecolAlar: el déficit respecto al caudal ambiental " 
                                 ),
-                                html.Img(src="/assets/Output.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
+                                html.Img(src="/assets/Output.JPG", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
                             ]
                         ),
                     ),
