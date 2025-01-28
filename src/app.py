@@ -8,8 +8,8 @@ source documentation : https://dash-bootstrap-components.opensource.faculty.ai/d
 http://127.0.0.1:8050
 
 """
-import os
-os.chdir(r'C:\Users\sophi\myCloud\Sophia\Thesis\Model\Jucar_model\Adrià\App_Dash\src')
+# import os
+# os.chdir(r'C:\Users\sophi\myCloud\Sophia\Thesis\Model\Jucar_model\Adrià\App_Dash\src')
 # Import libraries and modules
 import pandas as pd
 import pysd
