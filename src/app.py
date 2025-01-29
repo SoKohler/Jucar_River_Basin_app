@@ -138,18 +138,14 @@ def create_modal_Alarcon_Qeco():
                     dbc.ModalBody(
                         html.Div(
                             [
-                                html.P(
-                                    "QEcolAlar: Este es el caudal ambiental aguas abajo del embalse de Alarcón. "
-                                    "Se basa en factores hidrológicos, operativos y ambientales."
-                                    "Este es el diagrama causal:")
-                                ,
+                                html.P([html.B("QEcolAlar: "), "Este es el caudal ambiental aguas abajo del embalse de Alarcón. "]),
+                                html.P("Se basa en factores hidrológicos, operativos y ambientales."),
+                                html.P("Este es el diagrama causal:"),
                                 html.Img(src="/assets/QecoAlar_tree.jpg", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
-                                html.P(
-                                    "En rojo se encuentra el parámetro Qeco en el Modelo Dinámico de Sistemas. "
-                                    "En verde están las dos salidas de la simulación (ver gráfico): "
-                                    "Sal Júcar: el caudal de salida "
-                                    "DéfQecolAlar: el déficit respecto al caudal ambiental " 
-                                ),
+                                html.P("En rojo se encuentra el parámetro Qeco en el Modelo Dinámico de Sistemas. "
+                                       "En verde están las dos salidas de la simulación (ver gráfico): "),
+                                html.P([html.B("Sal Júcar: "), "el caudal de salida del embalse de Alarcón"]),
+                                html.P([html.B("DéfQecolAlar: "),"el déficit respecto al caudal ambiental "]),
                                 html.Img(src="/assets/Output.JPG", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro QEcolAlar",),
                             ]
                         ),
@@ -244,7 +240,7 @@ def create_parameter_panel_Alarcon():
             # Opción 1 : Desplegable para entrada constante
             html.Div([
                 html.P("Establezca un QEcol constante:", className="text-center mt-1"),
-                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=1.0,
+                dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=5.18,
                           style={"width": "100px", "text-align": "center", "margin": "0 auto"})
             ], id="qecolAlar-constant", style={"text-align": "center", "margin-bottom": "20px"}),
 
@@ -335,9 +331,11 @@ def create_modal_population():
                     dbc.ModalHeader(dbc.ModalTitle("Explicación")),
                     dbc.ModalBody(
                         html.Div([
+                                html.P([html.B("Variation rate:"),
+                                    " Simular el crecimiento de la población de Valencia y Sagunto."]
+                                    ),
                                 html.P(
-                                    "Variation rate: Simular el crecimiento de la población de Valencia y Sagunto."
-                                    "This is the Causal diagrams :"
+                                    "Causal diagrams :"
                                     ),
                                 html.Img(src="/assets/links_variation_rate.png", style={"width": "100%", "margin-bottom": "20px"}, alt="Diagrama del parámetro Variation rate",),
                             ]
