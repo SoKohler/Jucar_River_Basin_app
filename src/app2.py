@@ -17,8 +17,6 @@ import dash
 from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
-from find_influenced_variable import find_influenced_variables
-
 
 """in this version I will not modify the excel sheet but directly work with the variable saved in Vensim
     Therefore, I will run the model (Vensim) one with the initial values and then exctract the data 
@@ -118,7 +116,7 @@ def create_model_presentation():
         )
     ])
 
-#### 3. Page for the Alarcon reservoir simultation
+#### 3. Página del Embalse de Alarcón
 def create_modal_Alarcon_Qeco():
     modal_Alarcon = html.Div([
             html.Div([
@@ -168,14 +166,13 @@ def create_modal_Alarcon_Qeco():
 def create_modal_Alarcon_inputs():
     modal_Alarcon = html.Div([
             html.Div([
-                    html.P(
+                    html.H5(
                         "Seleccione el tipo de entrada",
                         style={"display": "inline-block","margin-right": "5px","margin-top": "5px"},
-                        className="text-center mt-1",
                     ),
                     html.I(
                         className="bi bi-info-circle",
-                        id="info-icon-Alarcon-inputs",  # ID 
+                        id="info-icon-Alarcon-inputs",  # ID para abrir el modal
                         style={"fontSize": "0.7rem","color": "#0f375e","cursor": "pointer",},
                     ),
                     html.P(
@@ -208,8 +205,6 @@ def create_modal_Alarcon_inputs():
 
 # 3.2 Panel de parameter
 def create_parameter_panel_Alarcon():
-    modified_variable = 'QEcolAlar'  
-    impacted_variables_QecoAlar= find_influenced_variables(modified_variable)
     return html.Div([
         html.H3("Configuración de parámetros", className="text-center mt-3",style={"font-size": "27px"}),
         create_modal_Alarcon_Qeco(),
@@ -226,8 +221,6 @@ def create_parameter_panel_Alarcon():
                         dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
                 ], className="mb-3")
             ], style={"margin-bottom": "20px"}),
-            
-            html.Hr(style={"border": "2px solid black","margin-bottom": "20px","margin-top": "25px"}), # horizontal line black
 
             # Elija entre entrada constante o dinámica
             create_modal_Alarcon_inputs(),
@@ -242,13 +235,13 @@ def create_parameter_panel_Alarcon():
                 style={"margin-left": "18px"},
                 className="mb-3"
             ),
-            html.Hr(style={"border": "1px solid black","margin-bottom": "20px","margin-top": "25px"}), # horizontal line black
+            html.Hr(style={"border": "1px solid black","margin-bottom": "20px","margin-top": "25px"}), # Línea horizontal negra
             
             # Opción 1 : Desplegable para entrada constante
             html.Div([
                 html.P("Establezca un QEcol constante:", className="text-center mt-1"),
                 dbc.Input(id="qecolAlar-constant-input",type="number", min=0.0, max=10.0, step=0.1, value=5.18,
-                          style={"width": "100px", "font-size": "14px",  "text-align": "center", "margin": "0 auto"})
+                          style={"width": "100px", "text-align": "center", "margin": "0 auto"})
             ], id="qecolAlar-constant", style={"text-align": "center", "margin-bottom": "20px"}),
 
             # Opción 2 : Desplegables dinámicos para 12 meses
@@ -281,66 +274,41 @@ def create_parameter_panel_Alarcon():
                     ])
                 ])
             ], id="qecolAlar-dynamic", 
-                style={"display": "none", "margin-bottom": "20px", "font-size": "14px", "margin-top": "20px"},
+                style={"display": "none", "margin-bottom": "20px","margin-top": "20px"},
                 className="text-center mt-0"),
-            html.Hr(style={"border": "2px solid black","margin-bottom": "20px","margin-top": "25px"}), # horizontal line black
-
-            # Dropdown to select the variable to plot
-            html.Div([
-                html.P("Seleccione la variable a visualizar:", className="text-center mt-1"),
-                dcc.Dropdown(
-                    id="graph-variable-selector",
-                    options=[{"label": var, "value": var} for var in impacted_variables_QecoAlar],
-                    value="Sal Jucar",  # Default selection
-                    clearable=False,
-                    style={"width": "100%", "margin": "0 auto"}
-                ),
-            ], style={"text-align": "center", "margin-bottom": "10px"}),
             
             # Botón de simulación
             html.Div([
                 dbc.Button("Ejecutar Simulación", id="run-simulation", color="primary",className="text-center mt-0")
             ],  style={"display": "flex", "justify-content": "center","align-items": "center", "margin-top": "20px",  "margin-bottom": "20px"})
-        
         ], className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"}),
+        
         ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
 def create_alarcon_page():
-    return dbc.Container(fluid=True, children=[
-        html.H1("Embalse de Alarcón", className="text-center mt-0",style={ "margin-bottom": "40px"}),
+    return dbc.Container(fluid=True,children=[
+        html.H1("Embalse de Alarcón", className="text-center mt-0"),
         dbc.Row([
             dbc.Col(create_parameter_panel_Alarcon(), width=4),
             dbc.Col([
                 dbc.Spinner(
-                    html.Div([
-                        dcc.Graph(id="alarcon-graph",
-                            figure={"data": [go.Scatter(x=time,y=Outflow_Jucar_initial,mode="lines",name="Salida a lo largo del tiempo",line=dict(color="#4A90E2", width=2))],
-                                    "layout": 
-                                        go.Layout(title=dict(text="Salida a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'), x=0.5, xanchor='center',y=0.9),
-                                        xaxis=dict(title="Mes",tickmode="array",showgrid=True,ticks='outside',title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                        yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey',title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                        plot_bgcolor='#F0F4FA', 
-                                        height=550,  
-                                ),
-                            },
-                        ),
-                    ], style={
-                        "border": "0.5px solid rgba(15, 55, 94, 0.3)",
-                        "padding": "15px",
-                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                        "background-color": "#ffffff",
-                        "height": "600px",  
-                        "width": "100%",  
-                    }),
-                )
+                html.Div([
+                    dcc.Graph(
+                        id="outflow-graph",
+                        figure={
+                            "data": [go.Scatter(x=[], y=[], mode="lines", name="Salida")],
+                            "layout": go.Layout(title="Salida a lo largo del tiempo", xaxis={"title": "Meses"}, yaxis={"title": "hm³"})
+                        }),
+                    dcc.Graph(
+                        id="deficit-graph",
+                        figure={
+                            "data": [go.Scatter(x=[], y=[], mode="lines", name="Déficit")],
+                            "layout": go.Layout(title="Déficit a lo largo del tiempo", xaxis={"title": "Meses"}, yaxis={"title": "hm³"})
+                        }),
+                ],),)
             ], width=8),
-        ]),
+        ])
     ])
-
-
-
-
-
 
 #### 4. Population growth simulation page
 ## 4.1 Modal : parameters explanation
@@ -387,9 +355,6 @@ def create_modal_population():
 
 ## 4.2 parameter panel
 def create_parameter_panel_population():
-    modified_variable_pop = "Variation Rate"
-    impacted_variables_pop = find_influenced_variables(modified_variable_pop)
-    
     return html.Div([
         html.H3("Configuración de parámetros", className="text-center mt-3",style={"font-size": "27px"}),
         create_modal_population(),
@@ -406,72 +371,43 @@ def create_parameter_panel_population():
                     dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
             ], className="mb-3")
         ], style={"margin-bottom": "20px"}),
-        
-        html.Hr(style={"border": "2px solid black", "margin-bottom": "20px", "margin-top": "25px"}),
-
         #Dropdown  for variation rate input
         html.Div([
                 html.P("Establecer Variation rate:", className="text-center mt-1"),
                 dbc.Input(id="variation-rate-input",type="number", min=0.000, max=1.000, step=0.0001, value=variation_rate_initial_cst,
-                          style={"width": "100px", "text-align": "center", "margin": "0 auto","font-size": "13px"})
-                ], id="variation-rate", style={"text-align": "center", "margin-bottom": "20px"}),
-        
-        html.Hr(style={"border": "2px solid black", "margin-bottom": "20px", "margin-top": "25px"}),  
-
-        # Dropdown to select variable to plot
-        html.Div([
-            html.P("Seleccione la variable a visualizar:", className="text-center mt-1"),
-            dcc.Dropdown(
-                id="population-graph-variable-selector",
-                options=[{"label": var, "value": var} for var in impacted_variables_pop],
-                value="Total Demanda Urbana",  # Default selection
-                clearable=False,
-                style={"width": "100%", "margin": "0 auto"}
-            ),
-        ], style={"text-align": "center", "margin-bottom": "10px"}),
+                          style={"width": "100px", "text-align": "center", "margin": "0 auto"})
+                ], id="variation-rate", style={"text-align": "center", "margin-bottom": "10px"}),
          #simulation button
-        html.Div([
-            dbc.Button("Run Simulation", id="run-simulation-population", color="primary",className="text-center mt-0")
-        ],  style={"display": "flex", "justify-content": "center","align-items": "center", "margin-top": "20px",  "margin-bottom": "20px"})
-        
-        ], className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"}),
+                html.Div([
+                    dbc.Button("Run Simulation", id="run-simulation", color="primary",className="text-center mt-0")
+                ],  style={"display": "flex", "justify-content": "center","align-items": "center", "margin-top": "20px",  "margin-bottom": "20px"})
+                ],className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"})
         ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
+
+
 def create_population_growth_page():
-    return dbc.Container(fluid=True, children=[
-        html.H1("Análisis del Crecimiento Poblacional", className="text-center mt-0",style={ "margin-bottom": "40px"}),
-        dbc.Row([
-            dbc.Col(create_parameter_panel_population(), width=4),
-            dbc.Col([
-                dbc.Spinner(
-                    html.Div([
-                        dcc.Graph(
-                            id="population-dynamic-graph",
-                            figure={"data": [go.Scatter(x=time,y=Urban_demand_initial,mode="lines",name="Total Demanda Urbana inicial (Variation rate = 0)",line=dict(color="#4A90E2", width=2))],
-                                    "layout": 
-                                        go.Layout(title=dict(text="Total Demanda Urbana a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'), x=0.5, xanchor='center',y=0.9),
-                                        xaxis=dict(title="Tiempo",tickmode="array",showgrid=True,ticks='outside',title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                        yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey',title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                        plot_bgcolor='#F0F4FA', 
-                                        height=550,  
-                                        ),
-                            },
-                        ),
-                    ], style={
-                        "border": "0.5px solid rgba(15, 55, 94, 0.3)",
-                        "padding": "15px",
-                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                        "background-color": "#ffffff",
-                        "height": "600px",  
-                        "width": "100%",  
-                    }),
-                )
-            ], width=8),
-        ]),
-    ])
-
-
-
+    return dbc.Container(fluid=True,children=[
+            html.H1("Análisis del crecimiento demográfico", className="text-center mt-0"),
+            dbc.Row([
+                    dbc.Col(create_parameter_panel_population(), width=4),
+                    dbc.Col([
+                            dbc.Spinner(
+                                html.Div([
+                                        html.P("Dinámica del crecimiento demográfico: Analizar cómo influye el crecimiento demográfico en la demanda urbana."),
+                                        html.Div([
+                                                dcc.Graph(id="demand-graph",
+                                                    figure={
+                                                        "data": [go.Scatter(x=time, y=Urban_demand_initial,mode="lines",name="Total Demanda Urbana",)],
+                                                        "layout": go.Layout( title="Total Demanda Urbana", xaxis={"title": "Months"},yaxis={"title": "hm³"},legend={"orientation": "h", "x": 0,"y": 1.2, "xanchor": "left", "yanchor": "bottom", },margin={"l": 40, "r": 40, "t": 40, "b": 40},),  # Graph margin
+                                                             },
+                                                        ),
+                                                ],style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",},),
+                                        ])
+                                        )
+                            ], width=8,),
+                    ]),
+            ],)
 ### 5. Diverse Graphs pages
 ## 5.1 parameter panel
 def create_parameter_panel_divers():
@@ -491,9 +427,6 @@ def create_parameter_panel_divers():
                     dcc.Dropdown(id="end-year",options=[{"label": str(year), "value": year} for year in range(2003,2014)], value=2013,clearable=False,style={"margin": "1 auto","padding": "0px","width": "65px","text-align": "left","box-sizing": "border-box"})], width=6,style={"text-align": "center"}),
             ], className="mb-3")
         ], style={"margin-bottom": "20px"}),
-        
-        html.Hr(style={"border": "2px solid black", "margin-bottom": "20px", "margin-top": "25px"}),  
-        
         # Dropdown to select a variable
         html.Div([
             html.P("Seleccionar una variable del gráfico:", className="text-center mt-1"),
@@ -504,32 +437,28 @@ def create_parameter_panel_divers():
         html.Div([
             dbc.Button("Ejecutar Simulación", id="run-simulation", color="primary", className="text-center mt-0")
         ], style={"display": "flex", "justify-content": "center", "align-items": "center", "margin-top": "20px", "margin-bottom": "20px"})
-        
         ],className="p-4 bg-light shadow rounded", style={ "margin-bottom": "20px"})
         ], style={"width": "255px","maxWidth": "400px", "margin": "20px 1", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)","borderRadius": "8px","backgroundColor": "#dbe1e7","padding": "30px","font-size": "14px"})
 
 def create_divers_graphs_page():
     return dbc.Container(fluid=True,children=[
-            html.H1("Diversos gráficos", className="text-center mt-0",style={ "margin-bottom": "40px"}),
+            html.H1("Diversos gráficos", className="text-center mt-0"),
             dbc.Row([
                     dbc.Col(create_parameter_panel_divers(), width=4),
                     dbc.Col([
                             dbc.Spinner(
                                 html.Div([
                                         html.Div([
-                                                dcc.Graph(id="divers-graph", 
-                                                figure={
-                                                    "data": [go.Scatter(x=[], y=[],mode="lines")],
-                                                    "layout": 
-                                                    go.Layout(title=dict(text="Variable seleccionada a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'), x=0.5, xanchor='center',y=0.9),
-                                                    xaxis=dict(title="Tiempo",tickmode="array",showgrid=True,ticks='outside',range=[0, 120], title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                                    yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey',range=[0, 20],title_font=dict(size=16, color='black'),tickfont=dict(size=12),),
-                                                    plot_bgcolor='#F0F4FA', 
-                                                    height=550,  
-                                                    ),},),
+                                                dcc.Graph(id="divers-graph", figure={},),
                                                 ],style={"border": "0.5px solid rgba(15, 55, 94, 0.3)","padding": "15px", "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)","background-color": "#ffffff",},),
                                         ])
                                         )], width=8,),]),],)
+
+def create_questions_page():
+    return 
+
+
+
 
 # Navigation menu
 def create_menu():
@@ -636,9 +565,9 @@ def toggle_input(input_type):
 #graphs
 # Graph callbacks
 @app.callback(
-    Output("alarcon-graph", "figure"),
-    [Input("run-simulation", "n_clicks"),
-     Input("graph-variable-selector", "value")],  # User-selected variable
+    [Output("outflow-graph", "figure"),
+     Output("deficit-graph", "figure")],
+    [Input("run-simulation", "n_clicks")],
     [State("start-year", "value"),
      State("end-year", "value"),
      State("qecolAlar-selector", "value"),
@@ -657,12 +586,12 @@ def toggle_input(input_type):
      State("dec-value", "value")],
     prevent_initial_call=True
 )
-
-def update_Alarcon_graphs(n_clicks, selected_variable, start_year, end_year, input_type,constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
+def update_Alarcon_graphs(n_clicks, start_year, end_year, input_type, constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
     if n_clicks is None:
-        raise dash.exceptions.PreventUpdate  # Prevent update if no click
-
+        raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
         
+        
+
     # Determine QecoAlar values based on input type
     if input_type == "option1":
         qecolAlar_values = [constant_value] * 12 * years_sim
@@ -679,15 +608,16 @@ def update_Alarcon_graphs(n_clicks, selected_variable, start_year, end_year, inp
     variables_model['Mes'] = months_data
     variables_model['Año'] = years_data
 
-
-
     #generate a vector with value from start_year to end_year (the selected years)
     #filter initial value
     variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
-    selected_variable_initial_filtered = variables_model_initial_filtered[selected_variable]
+    Outflow_Jucar_initial_filtered = variables_model_initial_filtered['Sal Jucar']
+    DéfQecolAlar_initial_filtered = variables_model_initial_filtered['DéfQecolAlar']
     #So filter for rows where "Año" is between start_year and end_year included
     variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
-    selected_variable_updated = variables_model_updated[selected_variable]
+    Outflow_Jucar_updated = variables_model_updated['Sal Jucar']
+    DéfQecolAlar_updated = variables_model_updated['DéfQecolAlar']
+
 
 
     # Determine tick labels based on simulation length
@@ -708,132 +638,44 @@ def update_Alarcon_graphs(n_clicks, selected_variable, start_year, end_year, inp
         ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
 
     # Create updated graphs
-    selected_figure = go.Figure()
-    selected_figure.add_trace(go.Scatter(y=selected_variable_initial_filtered, mode="lines", name=f"{selected_variable} initial (QecoAlar = {qecolAlar_initial_cst})", line=dict(dash="dot", color="#4A90E2", width=2) ))
-    selected_figure.add_trace(go.Scatter(y=selected_variable_updated, mode="lines", name=f"{selected_variable} actualizada",line=dict(color="#E94E77", width=2)))   
-    selected_figure.update_layout(
-        title=dict(text=f"{selected_variable} a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'),x=0.5, xanchor='center', y= 0.9 ),
-        xaxis=dict(title="fecha",tickmode="array", showgrid=True, tickvals=tickvals, ticks='outside', title_font=dict(size=14, color='black'), tickfont=dict(size=12), ticktext=ticktext, ),
-        yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey', title_font=dict(size=16, color='black'), tickfont=dict(size=12), ),
-        legend=dict(
-            font=dict(size=12),
-            bordercolor="black",
-            orientation='h',  
-            x=0.3,  
-            y=-0.18,  
-            xanchor='center',
-            yanchor='top'
-            ),
-        plot_bgcolor='#F0F4FA',
-        height=550,
+    outflow_figure = go.Figure()
+    outflow_figure.add_trace(go.Scatter(
+        y=Outflow_Jucar_initial_filtered, mode="lines",
+        name=f"Salida inicial (QecoAlar = {qecolAlar_initial_cst})",
+        line=dict(dash="dot")
+    ))
+    outflow_figure.add_trace(go.Scatter(
+        y=Outflow_Jucar_updated, mode="lines",
+        name="Salida actualizada"
+    ))
+    outflow_figure.update_layout(
+        title="Salida a lo largo del tiempo",
+        xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
+        yaxis=dict(title="hm³"),
+        
+        margin=dict(l=40, r=40, t=40, b=40),
+        template="plotly_white",
     )
-    return selected_figure
 
-# def update_Alarcon_graphs(n_clicks, selected_variable, start_year, end_year, input_type,constant_value, jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec):
-#     if n_clicks is None:
-#         raise dash.exceptions.PreventUpdate  # Prevent update if no click
+    deficit_figure = go.Figure()
+    deficit_figure.add_trace(go.Scatter(
+        y=DéfQecolAlar_initial_filtered, mode="lines",
+        name=f"Déficit inicial (QecoAlar = {qecolAlar_initial_cst})",
+        line=dict(dash="dot")
+    ))
+    deficit_figure.add_trace(go.Scatter(
+        y=DéfQecolAlar_updated, mode="lines",
+        name="Déficit actualizada"
+    ))
+    deficit_figure.update_layout(
+        title="Déficit a lo largo del tiempo",
+        xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
+        yaxis=dict(title="hm³"),
+        margin=dict(l=40, r=40, t=40, b=40),
+        template="plotly_white",
+    )
 
-        
-
-#     # Determine QecoAlar values based on input type
-#     if input_type == "option1":
-#         qecolAlar_values = [constant_value] * 12 * years_sim
-#         Qeco_Alar = pd.Series(qecolAlar_values)
-#     else:
-#         qeco = [jan, feb, mar, apr, may, jun, jul, aug, sep, octo, nov, dec]
-#         qecolAlar_values = qeco *years_sim
-#         Qeco_Alar = pd.Series(qecolAlar_values)
-
-#     # Rerun the Vensim model
-#     vensim_model = pysd.load('WEFE Jucar (Simple).py')
-#     variables_model = vensim_model.run(params={'INITIAL TIME': 1,'FINAL TIME': 12 * years_sim, 'TIME STEP': 1,  'QEcolAlar': Qeco_Alar})
-#     variables_model.index = range(0, len(variables_model) ) #change the index because Vensim starts at 1 
-#     variables_model['Mes'] = months_data
-#     variables_model['Año'] = years_data
-
-#     #generate a vector with value from start_year to end_year (the selected years)
-#     #filter initial value
-#     variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
-#     Outflow_Jucar_initial_filtered = variables_model_initial_filtered['Sal Jucar']
-#     DéfQecolAlar_initial_filtered = variables_model_initial_filtered['DéfQecolAlar']
-#     #So filter for rows where "Año" is between start_year and end_year included
-#     variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
-#     Outflow_Jucar_updated = variables_model_updated['Sal Jucar']
-#     DéfQecolAlar_updated = variables_model_updated['DéfQecolAlar']
-
-
-
-#     # Determine tick labels based on simulation length
-#     # Calculate the number of months based on the selected years
-#     nb_years_sim = end_year - start_year + 1
-#     all_months_list = list(variables_model_updated["Mes"])
-#     all_years_list = list(variables_model_updated["Año"])
-#     if nb_years_sim < 3:
-#         #all months list
-#         all_months_label = [f"{mes} {int(year)}" for mes, year in zip(all_months_list, all_years_list)]
-#         tickvals = list(range(len(all_months_list)))  # Tick values correspond to indices
-#         ticktext = all_months_label  # Tick text corresponds to full month-year labels
-
-#     else:
-#         # Create a list with 'oct' if present in "Mes", otherwise ''
-#         oct_label = [f"{mes} {int(year)}" if mes == 'oct' else '' for mes, year in zip(all_months_list, all_years_list)]
-#         tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
-#         ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
-
-#     # Create updated graphs
-#     outflow_figure = go.Figure()
-#     outflow_figure.add_trace(go.Scatter(
-#         y=Outflow_Jucar_initial_filtered, mode="lines",
-#         name=f"Salida inicial (QecoAlar = {qecolAlar_initial_cst})",
-#         line=dict(dash="dot")
-#     ))
-#     outflow_figure.add_trace(go.Scatter(
-#         y=Outflow_Jucar_updated, mode="lines",
-#         name="Salida actualizada"
-#     ))
-#     outflow_figure.update_layout(
-#         title="Salida a lo largo del tiempo",
-#         xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
-#         yaxis=dict(title="hm³"),
-        
-#         margin=dict(l=40, r=40, t=40, b=40),
-#         template="plotly_white",
-#     )
-
-#     deficit_figure = go.Figure()
-#     deficit_figure.add_trace(go.Scatter(
-#         y=DéfQecolAlar_initial_filtered, mode="lines",
-#         name=f"Déficit inicial (QecoAlar = {qecolAlar_initial_cst})",
-#         line=dict(dash="dot")
-#     ))
-#     deficit_figure.add_trace(go.Scatter(
-#         y=DéfQecolAlar_updated, mode="lines",
-#         name="Déficit actualizada"
-#     ))
-#     deficit_figure.update_layout(
-#         title="Déficit a lo largo del tiempo",
-#         xaxis=dict(title="Tiempo",tickmode="array", tickvals=tickvals, ticktext=ticktext,rangeslider=dict(visible=True),),  # Enable range slider for navigation
-#         yaxis=dict(title="hm³"),
-#         margin=dict(l=40, r=40, t=40, b=40),
-#         template="plotly_white",
-#     )
-    
-    
-    
-#     # Selected_variable
-#     # Filter data based on selected years
-#     variables_model_filtered = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
-#     selected_data = variables_model_filtered[selected_variable]
-#     selected_variable_figure = go.Figure()
-#     selected_variable_figure.add_trace(go.Scatter(y=selected_data, mode="lines", name=selected_variable))
-#     selected_variable_figure.update_layout(
-#         title=f"{selected_variable} a lo largo del tiempo",
-#         xaxis_title="Tiempo",
-#         yaxis_title="Valor",
-#         template="plotly_white"
-#     )
-
-#     return outflow_figure, deficit_figure, selected_variable_figure
+    return outflow_figure, deficit_figure
 
 
 #4.3 Population growth call back
@@ -850,18 +692,18 @@ def toggle_modal_population(icon_click, close_click, is_open):
 
 #graphs
 @app.callback(
-    Output("population-dynamic-graph", "figure"),
-    [Input("run-simulation-population", "n_clicks"),
-     Input("population-graph-variable-selector", "value")],  # selected variable
-    [State("start-year", "value"),
+    Output("demand-graph", "figure"),
+    [Input("run-simulation", "n_clicks")],  # Button click to trigger
+    [State("start-year", "value"), 
      State("end-year", "value"),
      State("variation-rate-input", "value")],
     prevent_initial_call=True
 )
 
-def update_population_graph(n_clicks, selected_variable, start_year, end_year, variation_rate):
+def update_population_graph(n_clicks, start_year, end_year, variation_rate):
     if n_clicks is None:
-        raise dash.exceptions.PreventUpdate  # Prevent update if no clicks
+        raise dash.exceptions.PreventUpdate  # Prevent callback if no clicks
+        
    
     # Rerun the Vensim model
     vensim_model = pysd.load('WEFE Jucar (Simple).py')
@@ -871,14 +713,15 @@ def update_population_graph(n_clicks, selected_variable, start_year, end_year, v
     variables_model['Año'] = years_data
     
     #generate a vector with value from start_year to end_year (the selected years)
-
     #filter initial value
     variables_model_initial_filtered = variables_model_initial[(variables_model_initial["Año"] >= start_year) & (variables_model_initial["Año"] <= end_year)]
-    updated_selected_variable_initial_filtered = variables_model_initial_filtered[selected_variable]
+    updated_urban_demand_initial_filtered = variables_model_initial_filtered['Total Demanda Urbana']
 
     #So filter for rows where "Año" is between start_year and end_year included
     variables_model_updated = variables_model[(variables_model["Año"] >= start_year) & (variables_model["Año"] <= end_year)]
-    updated_selected_variable = variables_model_updated[selected_variable]
+    updated_urban_demand = variables_model_updated['Total Demanda Urbana']
+    
+    
     
     # Determine tick labels based on simulation length
     # Calculate the number of months based on the selected years
@@ -897,35 +740,26 @@ def update_population_graph(n_clicks, selected_variable, start_year, end_year, v
         tickvals = [idx for idx, label in enumerate(oct_label) if label != '']  # Tick values for 'oct'
         ticktext = [label for label in oct_label if label != '']  # Tick text only for 'oct'
     
-    # Create a Plotly figure for selected variable
-    pop_figure = go.Figure()
-    # initial selected variable trace
-    pop_figure.add_trace(
-        go.Scatter(y=updated_selected_variable,mode="lines",name=f"{selected_variable} inicial (Variation rate = 0)",line=dict(dash="dot", color="#4A90E2", width=2),)
+    # Create a Plotly figure for urban demand
+    urban_demand_figure = go.Figure()
+    # initial urban demand trace
+    urban_demand_figure.add_trace(
+        go.Scatter(y=updated_urban_demand,mode="lines",name=f"Demanda urbana inicial (Variation rate = {variation_rate_initial_cst})",line=dict(dash="dot"),)
     )
-    # updated selected variable trace
-    pop_figure.add_trace(
-        go.Scatter(y=updated_selected_variable_initial_filtered, mode="lines",name=f"{selected_variable} actualizada (Variation rate = {variation_rate})",line=dict(color="#E94E77", width=2))
+    # updated urban demand trace
+    urban_demand_figure.add_trace(
+        go.Scatter(y=updated_urban_demand_initial_filtered, mode="lines",name=f"Demanda urbana actualizada (Variation rate = {variation_rate})",)
     )
     # Customize the layout of the figure
-    pop_figure.update_layout(
-        title=dict(text=f"{selected_variable} a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'),x=0.5, xanchor='center', y= 0.9 ),
-        xaxis=dict(title="fecha",tickmode="array", showgrid=True, tickvals=tickvals, ticks='outside', title_font=dict(size=14, color='black'), tickfont=dict(size=12), ticktext=ticktext, ),
-        yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey', title_font=dict(size=16, color='black'), tickfont=dict(size=12), ),
-        legend=dict(
-            font=dict(size=12),
-            bordercolor="black",
-            orientation='h',  
-            x=0.3,  
-            y=-0.18,  
-            xanchor='center',
-            yanchor='top'
-            ),
-        plot_bgcolor='#F0F4FA',
-        height=550,
+    urban_demand_figure.update_layout(
+        title="Demanda urbana a lo largo del tiempo",
+        xaxis=dict(title="Tiempo", tickmode="array", tickvals=tickvals,  ticktext=ticktext, rangeslider=dict(visible=True), ),
+        yaxis=dict(title="hm³"),
+        margin=dict(l=40, r=40, t=40, b=40),
+        template="plotly_white",
     )
 
-    return pop_figure
+    return urban_demand_figure
 
 #5.3 divers callback
 @app.callback(
@@ -976,20 +810,23 @@ def update_divers_graph(n_clicks, start_year, end_year, chosen_variable):
 
     # Update layout with dynamic tick values and labels
     figure.update_layout(
-        title=dict(text=f"{chosen_variable} a lo largo del tiempo",font=dict(size=20, family='Arial, sans-serif', color='black'),x=0.5, xanchor='center', y= 0.9 ),
-        xaxis=dict(title="fecha",tickmode="array", showgrid=True, tickvals=tickvals, ticks='outside', title_font=dict(size=14, color='black'), tickfont=dict(size=12), ticktext=ticktext, ),
-        yaxis=dict(title="hm³",showgrid=True,gridcolor='lightgrey', title_font=dict(size=16, color='black'), tickfont=dict(size=12), ),
-        legend=dict(
-            font=dict(size=12),
-            bordercolor="black",
-            orientation='h',  
-            x=0.3,  
-            y=-0.18,  
-            xanchor='center',
-            yanchor='top'
-            ),
-        plot_bgcolor='#F0F4FA',
-        height=550,
+        title={
+        "text": f"{chosen_variable} a lo largo del tiempo",
+        "x": 0.5,  # Center the title
+        "xanchor": "center",  # Ensure proper alignment
+        "yanchor": "top",  # Keep it at the top
+        "font": {"size": 20, "family": "Arial, sans-serif", "color": "black", "weight": "bold"}  # Bold and styling
+        },
+        xaxis=dict(
+            title="Time",
+            tickmode="array",
+            tickvals=tickvals,
+            ticktext=ticktext,
+            rangeslider=dict(visible=True),  # Enable range slider for navigation
+        ),
+        yaxis=dict(title="hm³"),
+        margin=dict(l=40, r=40, t=40, b=40),
+        template="plotly_white",
     )
 
     return figure
